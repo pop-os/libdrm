@@ -1,3 +1,119 @@
+commit 63aeae123848d0bfbc0a35102cb9717cf496eab6
+Author: Marek Olšák <maraeo@gmail.com>
+Date:   Wed May 15 19:32:05 2013 +0200
+
+    configure.ac: bump version to 2.4.45 for release
+
+commit e5e51c2110ebf6e1edaa14b7567c5d6a79008a90
+Author: Marek Olšák <maraeo@gmail.com>
+Date:   Wed Apr 24 20:39:45 2013 +0200
+
+    radeon: add RADEON_SURF_FMASK flag which disables 2D->1D tiling transition
+    
+    Signed-off-by: Marek Olšák <maraeo@gmail.com>
+    Reviewed-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit 96e90aabc4c0238de2f2d245899f991a3b996587
+Author: Alex Deucher <alexander.deucher@amd.com>
+Date:   Mon May 13 16:14:28 2013 -0400
+
+    radeon: add HAINAN pci ids
+    
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit c56729cc1564bb4204ca30a18499a78a39f48892
+Author: Alex Deucher <alexander.deucher@amd.com>
+Date:   Mon May 13 16:15:17 2013 -0400
+
+    radeon: add HAINAN family
+    
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit 040f6b015ef7d9c1bda09f78a8873f6da45d5e95
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Thu May 9 12:55:42 2013 +1000
+
+    drm: add qxl drm header file
+    
+    Now that this driver is merged add the header file.
+    
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
+commit 011999927f76a7e9ba8f047fae4b4e084da6c2c3
+Author: Xiang, Haihao <haihao.xiang@intel.com>
+Date:   Wed Nov 14 12:46:39 2012 +0800
+
+    intel: Add support for VEBOX ring (v2)
+    
+    v2: Fix the test for has_vebox
+    
+    Signed-off-by: Xiang, Haihao <haihao.xiang@intel.com>
+    Signed-off-by: Ben Widawsky <ben@bwidawsk.net>
+
+commit b3a3a77823ada2eb37233678b5a49efaec9b75cb
+Author: Rob Clark <robclark@freedesktop.org>
+Date:   Thu Apr 25 16:36:15 2013 -0400
+
+    freedreno: add synchronization between mesa and ddx
+    
+    Super-cheezy way to synchronization between mesa and ddx..  the
+    SET_ACTIVE ioctl gives us a way to stash a 32b # w/ a GEM bo, and
+    GET_BUFINFO gives us a way to retrieve it.  We use this to stash
+    the timestamp of the last ISSUEIBCMDS on the buffer.
+    
+    To avoid an obscene amount of syscalls, we:
+     1) Only set the timestamp for buffers w/ an flink name, ie.
+        only buffers shared across processes.  This is enough to
+        catch the DRI2 buffers.
+     2) Only set the timestamp for buffers submitted to the 3d ring
+        and only check the timestamps on buffers submitted to the
+        2d ring.  This should be enough to handle synchronizing of
+        presentation blit.  We could do synchronization in the other
+        direction too, but that would be problematic if we are using
+        the 3d ring from DDX, since client side wouldn't know this.
+    
+    The waiting on timestamp happens before flush, and setting of
+    timestamp happens after flush.  It is transparent to the user
+    of libdrm_freedreno as all the tracking of buffers happens via
+    _emit_reloc()..
+    
+    Signed-off-by: Rob Clark <robclark@freedesktop.org>
+
+commit ec3c257eb6958da493aee6f010f51a07d7ba4160
+Author: Alex Deucher <alexander.deucher@amd.com>
+Date:   Thu Apr 25 14:13:52 2013 -0400
+
+    radeon: add new richland pci ids
+    
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit 439d7d74320a148a2d53aec1ca28eba672ad9353
+Author: Alex Deucher <alexander.deucher@amd.com>
+Date:   Thu Apr 25 14:12:50 2013 -0400
+
+    radeon: add new SI pci ids
+    
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit 12464a70ed502d9f401931156005afd717a9992f
+Author: Rob Clark <robclark@freedesktop.org>
+Date:   Mon Apr 22 14:50:57 2013 -0400
+
+    Add exynos_fimg2d_test to .gitignore
+    
+    Signed-off-by: Rob Clark <robclark@freedesktop.org>
+
+commit 86709ba5373730a438602459e104bf0a9a49559d
+Author: Rob Clark <robclark@freedesktop.org>
+Date:   Mon Apr 22 14:49:28 2013 -0400
+
+    freedreno: add gpu-id property
+    
+    Gallium driver will need to query this to figure out whether to load the
+    a2xx or a3xx driver.
+    
+    Signed-off-by: Rob Clark <robclark@freedesktop.org>
+
 commit 9768af201e9aba2093c80a8da3632fe9e4c044fe
 Author: Jerome Glisse <jglisse@redhat.com>
 Date:   Thu Apr 18 15:01:19 2013 -0400
