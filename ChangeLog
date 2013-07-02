@@ -1,3 +1,162 @@
+commit c6d73cfeeaff9596c735d0a10b248f94b2e1e347
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Tue Jul 2 09:24:53 2013 +0100
+
+    libdrm: bump to 2.4.46
+
+commit 2e0ab6237697c9754d92689f77c1792c11be881b
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Tue Jul 2 09:21:06 2013 +0100
+
+    drm: add hotspot cursor interface support.
+    
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
+commit 378bb47a784a3808c9b256fe7a52e10a4fcabf92
+Author: Alex Deucher <alexander.deucher@amd.com>
+Date:   Thu Jan 24 18:01:59 2013 -0500
+
+    radeon: add kabini pci ids
+    
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit 96c04c23fca6656483f66ecb0da0679df02eb9c0
+Author: Alex Deucher <alexander.deucher@amd.com>
+Date:   Fri Jun 7 13:46:37 2013 -0400
+
+    radeon: add Bonaire pci ids
+    
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit 0ff7f2760d052503d5cf65ded34a66fe20ccec28
+Author: Alex Deucher <alexander.deucher@amd.com>
+Date:   Fri Jun 7 13:45:30 2013 -0400
+
+    radeon: add CIK chip families
+    
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit fbd106ad76b0ee33814f6a5b94efaa0b067ec2af
+Author: Damien Lespiau <damien.lespiau@intel.com>
+Date:   Wed Feb 20 12:11:49 2013 +0000
+
+    intel/aub: Implement a way to specify the output .aub filename
+    
+    Signed-off-by: Damien Lespiau <damien.lespiau@intel.com>
+    Reviewed-by: Kenneth Graunke <kenneth@whitecape.org>
+
+commit 1e4f63bbc8e9a23c90745e10027e2772bab15038
+Author: Damien Lespiau <damien.lespiau@intel.com>
+Date:   Wed Feb 20 12:11:50 2013 +0000
+
+    intel/aub: Return early if we disable aub dumps
+    
+    No need to prepare the .aub header and dump in that case, it'll be
+    done with the next call with true.
+    
+    Signed-off-by: Damien Lespiau <damien.lespiau@intel.com>
+    Reviewed-by: Kenneth Graunke <kenneth@whitecape.org>
+
+commit 59257580666cf5f5916bf989d94bace774030bd5
+Author: Damien Lespiau <damien.lespiau@intel.com>
+Date:   Wed Feb 20 12:11:48 2013 +0000
+
+    intel/aub: Sync the AUB defines with mesa's
+    
+    Signed-off-by: Damien Lespiau <damien.lespiau@intel.com>
+    Reviewed-by: Kenneth Graunke <kenneth@whitecape.org>
+
+commit a0178c00c70f4b47e09ed7564fc2ccde611231a0
+Author: Mark Kettenis <kettenis@openbsd.org>
+Date:   Wed Jun 5 13:04:30 2013 +1000
+
+    radeon: correct RADEON_GEM_WAIT_IDLE use
+    
+    RADEON_GEM_WAIT_IDLE is declared DRM_IOW but libdrm
+    uses it with drmCommandWriteRead instead of drmCommandWrite
+    which leads to the ioctl being unmatched and returning an
+    error on at least OpenBSD.
+    
+    Signed-off-by: Mark Kettenis <kettenis@openbsd.org>
+    Signed-off-by: Jonathan Gray <jsg@jsg.id.au>
+
+commit 1669a67d063e82a58dae4d906015172d471e9a2a
+Author: Rodrigo Vivi <rodrigo.vivi@gmail.com>
+Date:   Mon May 13 17:48:40 2013 -0300
+
+    intel: Adding more reserved PCI IDs for Haswell.
+    
+    At DDX commit Chris mentioned the tendency we have of finding out more
+    PCI IDs only when users report. So Let's add all new reserved Haswell IDs.
+    
+    Bugzilla: http://bugs.freedesktop.org/show_bug.cgi?id=63701
+    Signed-off-by: Rodrigo Vivi <rodrigo.vivi@gmail.com>
+    Acked-by: Kenneth Graunke <kenneth@whitecape.org>
+
+commit 150c3555e7ba53f6ad2d3970cca8e4d5970410aa
+Author: Rodrigo Vivi <rodrigo.vivi@gmail.com>
+Date:   Mon May 13 17:48:39 2013 -0300
+
+    intel: Fix Haswell GT3 names.
+    
+    When publishing first HSW ids we weren't allowed to use "GT3" codname.
+    But this is the correct codname and Mesa is using it already.
+    So to avoid people getting confused why in Mesa it is called GT3 and here
+    it is called GT2_PLUS let's fix this name in a standard and correct way.
+    
+    Signed-off-by: Rodrigo Vivi <rodrigo.vivi@gmail.com>
+    Reviewed-by: Chad Versace <chad.versace@linux.intel.com>
+    Reviewed-by: Kenneth Graunke <kenneth@whitecape.org>
+
+commit 8a88e349975a64676f143183e835e6d296f29627
+Author: Ville Syrjälä <ville.syrjala@linux.intel.com>
+Date:   Thu Apr 18 17:26:52 2013 +0300
+
+    modetest: Make RGB565 pwetty too
+    
+    Render the crosshairs for 565 and x888/a888 formats.
+    
+    v2: Use the drm format to determine cairo format
+    
+    Acked-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+    Signed-off-by: Ville Syrjälä <ville.syrjala@linux.intel.com>
+
+commit 3586337f3703ce4833a375f66b08df064a1cec28
+Author: Rob Clark <robclark@freedesktop.org>
+Date:   Fri May 17 16:13:02 2013 -0400
+
+    freedreno: also remove from name table on bo delete
+    
+    When adding the name tracking, I missed removing from the name table
+    when the bo was deleted, leaving a dangling pointer.
+    
+    Signed-off-by: Rob Clark <robclark@freedesktop.org>
+
+commit acfbf394a9176ea97f114ca6c0eb8249a2220e82
+Author: Rob Clark <robclark@freedesktop.org>
+Date:   Wed May 15 13:21:24 2013 -0400
+
+    freedreno: add some asserts
+    
+    Things are worse if we issueibcmds with bogus gpu ptrs, so it is better
+    to just make userspace crash when things go pear shaped.
+    
+    Signed-off-by: Rob Clark <robclark@freedesktop.org>
+
+commit 0b89e2730c41466e8d9c04c469679ba23d052ec9
+Author: Rob Clark <robclark@freedesktop.org>
+Date:   Wed May 15 13:18:02 2013 -0400
+
+    freedreno: add handle and name tracking
+    
+    Due to the evil userspace buffer tracking we have to do, and hacks for
+    creating GEM buffer from fbdev/scanout, "evil-twin" fd_bo objects are
+    problematic.  So introduce hashtable tracking of bo's and dev's, to
+    avoid getting duplicate fd_bo ptrs for the same underlying gem object,
+    in particular when importing via flink name.
+    
+    Signed-off-by: Rob Clark <robclark@freedesktop.org>
+
 commit 63aeae123848d0bfbc0a35102cb9717cf496eab6
 Author: Marek Olšák <maraeo@gmail.com>
 Date:   Wed May 15 19:32:05 2013 +0200
