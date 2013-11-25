@@ -1,3 +1,787 @@
+commit 7ddc98f92f92560e2b52287ae8cf816ca4a057de
+Author: Marek Olšák <marek.olsak@amd.com>
+Date:   Sat Nov 23 01:27:57 2013 +0100
+
+    Bump the version for release
+
+commit 3f4648902296efa3a8cc0abc941d978637f0ee28
+Author: Marek Olšák <marek.olsak@amd.com>
+Date:   Sat Nov 23 00:34:45 2013 +0100
+
+    radeon: handle P16 pipe configs for Hawaii
+
+commit f0e399d8f0c3c006687e0fc8e68268087607d5f5
+Author: Michel Dänzer <michel.daenzer@amd.com>
+Date:   Mon Nov 18 11:40:08 2013 +0100
+
+    radeon: don't overallocate stencil by 4 on SI and CIK
+    
+    Signed-off-by: Marek Olšák <marek.olsak@amd.com>
+    Reviewed-and-Tested-by: Michel Dänzer <michel.daenzer@amd.com>
+
+commit 67d92404d62044972599dcef3011d17fca46eed5
+Author: Marek Olšák <marek.olsak@amd.com>
+Date:   Fri Nov 22 23:31:13 2013 +0100
+
+    radeon: implement 2D tiling for CIK
+    
+    Bug fixes and simplification by Marek.
+    We have to use the tile index of 0 for non-MSAA depth-stencil after all.
+    
+    Signed-off-by: Marek Olšák <marek.olsak@amd.com>
+    Reviewed-and-Tested-by: Michel Dänzer <michel.daenzer@amd.com>
+    Reviewed-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit ce8af454259279c14c44bcd32c429640ca5e1691
+Author: Michel Dänzer <michel.daenzer@amd.com>
+Date:   Thu Nov 14 16:40:30 2013 +0100
+
+    radeon: fix mipmap level 0 and 1 alignment for SI and CIK
+    
+    Signed-off-by: Marek Olšák <marek.olsak@amd.com>
+    Reviewed-and-Tested-by: Michel Dänzer <michel.daenzer@amd.com>
+    Reviewed-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit 0c3fd8708fc54b4b46f5db20d34eb29508537b08
+Author: Ian Romanick <ian.d.romanick@intel.com>
+Date:   Wed Nov 20 08:32:14 2013 -0800
+
+    intel: Use memset instead of VG_CLEAR
+    
+    The ioctl expects that certain fields will be zeroed, so we should allow
+    the helper function to actually work in non-Valgrind builds.
+    
+    Signed-off-by: Ian Romanick <ian.d.romanick@intel.com>
+    Reported-by: Zhenyu Wang <zhenyuw@linux.intel.com>
+    Reviewed-by: Damien Lespiau <damien.lespiau@intel.com>
+    Reviewed-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+
+commit c601444a900d67be7ab84714c2908356de359655
+Author: Thomas Hellstrom <thellstrom@vmware.com>
+Date:   Tue Nov 19 07:50:11 2013 +0100
+
+    libdrm/mode: Update the encoder and connector defines
+    
+    Update the defines to match the kernel drm_mode.h
+    
+    Signed-off-by: Thomas Hellstrom <thellstrom@vmware.com>
+    Reviewed-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit 71beb7b07950d9088d754cf7baf0421f5f264e48
+Author: Ian Romanick <ian.d.romanick@intel.com>
+Date:   Fri Nov 15 18:01:08 2013 -0800
+
+    libdrm: bump to 2.4.48
+
+commit 5a41b025042c42788977e67aea8d1bf3b59baae4
+Author: Ian Romanick <ian.d.romanick@intel.com>
+Date:   Fri Nov 15 10:24:43 2013 -0800
+
+    intel: Add support for GPU reset status query ioctl
+    
+    I would have just used the drmIoctl interface directly in Mesa, but the
+    ioctl needs some data from the drm_intel_context that is not exposed
+    outside libdrm.
+    
+    This ioctl is in the drm-intel-next tree as b635991.
+    
+    v2: Update based on Mika's kernel work.
+    
+    v3: Fix compile failures from last-minute typos.  Sigh.
+    
+    v4: Import the actual changes from the kernel i915_drm.h.  Only comments
+    on some fields of drm_i915_reset_stats differed.  There are still some
+    deltas between the kernel i915_drm.h and the one in libdrm, but those
+    can be resolved in other patches.
+    
+    Signed-off-by: Ian Romanick <ian.d.romanick@intel.com>
+    Reviewed-by: Kenneth Graunke <kenneth@whitecape.org> [v3]
+    Reviewed-by: Damien Lespiau <damien.lespiau@intel.com>
+    Cc: Mika Kuoppala <mika.kuoppala@intel.com>
+    Cc: Daniel Vetter <daniel.vetter@ffwll.ch>
+
+commit 1a84eea45bf9d3915698a04199c594a63fcca4a2
+Author: Alex Deucher <alexander.deucher@amd.com>
+Date:   Tue Sep 24 11:30:19 2013 -0400
+
+    radeon: add hawaii pci ids
+    
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit efcc456030334a692e2fce7bbd279df3aee13a6d
+Author: Alex Deucher <alexander.deucher@amd.com>
+Date:   Tue Sep 24 11:27:11 2013 -0400
+
+    radeon: add hawaii chip family
+    
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit da738d1ed0a0941a0cd061395ad86072171b3242
+Author: Dave Airlie <airlied@redhat.com>
+Date:   Fri Nov 8 16:40:18 2013 +1000
+
+    Revert "intel: Add support for GPU reset status query ioctl"
+    
+    This reverts commit 6335e1d28c422050024bcf4100c4fb3a5bac2afb.
+    
+    No taxation without representation, in other words no userspace without kernel
+    stuff being in a stable location, either drm-next but I'll accept drm-intel-next
+    for intel specific stuff.
+
+commit 6335e1d28c422050024bcf4100c4fb3a5bac2afb
+Author: Ian Romanick <ian.d.romanick@intel.com>
+Date:   Mon Sep 10 14:15:02 2012 +0300
+
+    intel: Add support for GPU reset status query ioctl
+    
+    I would have just used the drmIoctl interface directly in Mesa, but the
+    ioctl needs some data from the drm_intel_context that is not exposed
+    outside libdrm.
+    
+    v2: Update based on Mika's kernel work.
+    
+    v3: Fix compile failures from last-minute typos.  Sigh.
+    
+    Signed-off-by: Ian Romanick <ian.d.romanick@intel.com>
+    Reviewed-by: Kenneth Graunke <kenneth@whitecape.org>
+    Cc: Mika Kuoppala <mika.kuoppala@intel.com>
+    Cc: Daniel Vetter <daniel.vetter@ffwll.ch>
+
+commit dad3c6b9791920f2bda1193d76f260827c4cd3f1
+Author: Damien Lespiau <damien.lespiau@intel.com>
+Date:   Fri Feb 15 16:44:05 2013 +0000
+
+    intel/bdw: Update MI_BATCH_BUFFER_START for aub dumps
+    
+    The command now takes a 48bits address and is thus 1 dword longer.
+    
+    v2 (Ben): commit message: s/byte/dword (Eric)
+    
+    Signed-off-by: Damien Lespiau <damien.lespiau@intel.com>
+    Reviewed-by: Eric Anholt <eric@anholt.net>
+    Signed-off-by: Ben Widawsky <ben@bwidawsk.net>
+
+commit a0c126dcedb8be64c644321c2b2836723117064b
+Author: Kenneth Graunke <kenneth@whitecape.org>
+Date:   Fri Feb 15 09:29:46 2013 -0800
+
+    intel/bdw/aub: Update AUB trace block writes for 48-bit addressing.
+    
+    Since our aub file dumping's GTT handling is totally fake, we always put
+    everything in the low 4GB anyway and shouldn't ever need to set
+    AddressHigh to anything other than 0.
+    
+    Signed-off-by: Kenneth Graunke <kenneth@whitecape.org>
+    [ben: slight commit message change]
+    Reviewed-by: Eric Anholt <eric@anholt.net>
+    Signed-off-by: Ben Widawsky <ben@bwidawsk.net>
+
+commit 946f847dc6683c88f69ea75e521d83ffbab4d40a
+Author: Damien Lespiau <damien.lespiau@intel.com>
+Date:   Wed Feb 13 16:09:34 2013 +0000
+
+    intel/bdw: Add gen8 to the decode init
+    
+    Signed-off-by: Damien Lespiau <damien.lespiau@intel.com>
+    Reviewed-by: Kenneth Graunke <kenneth@whitecape.org>
+    Reviewed-by: Eric Anholt <eric@anholt.net>
+    Signed-off-by: Ben Widawsky <ben@bwidawsk.net>
+
+commit 5b348f3ac0069485ecd86ee30483646fad4b01cc
+Author: Ben Widawsky <ben@bwidawsk.net>
+Date:   Wed Feb 13 16:09:33 2013 +0000
+
+    intel/bdw: Handle gen8 bufmgr_init
+    
+    [bwidawsk: Added Damien's SOB]
+    Signed-off-by: Damien Lespiau <damien.lespiau@intel.com>
+    Reviewed-by: Kenneth Graunke <kenneth@whitecape.org>
+    Reviewed-by: Eric Anholt <eric@anholt.net>
+    Signed-off-by: Ben Widawsky <ben@bwidawsk.net>
+
+commit 6ea20a0fe2f3ede1c89176db0aa447b9758fefd1
+Author: Ben Widawsky <ben@bwidawsk.net>
+Date:   Tue Dec 4 13:56:14 2012 -0800
+
+    intel/bdw: Add broadwell chipset IDs
+    
+    v2: Rename s/<SECRET>/IRIS/
+    
+    Reviewed-by: Kenneth Graunke <kenneth@whitecape.org>
+    Signed-off-by: Ben Widawsky <ben@bwidawsk.net>
+
+commit 482abbfafb56cbceaf5355c026434e638cddd0f1
+Author: Maarten Lankhorst <maarten.lankhorst@canonical.com>
+Date:   Thu Nov 7 13:30:19 2013 +0100
+
+    nouveau: prevent undefined behavior in nouveau_pushbuf_reloc with gcc-4.8
+    
+    Reported-by: ronald645@gmail.com
+    Bisected-by (gcc): Andreas Radke <a.radke@arcor.de>
+    Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=71116
+    Signed-off-by: Maarten Lankhorst <maarten.lankhorst@canonical.com>
+
+commit ebff7a1e2286781c6fc23e5ed9bcbf177603569c
+Author: Keith Packard <keithp@keithp.com>
+Date:   Sun Jul 21 14:24:35 2013 -0700
+
+    Add DRM_MODE_PAGE_FLIP_ASYNC define
+    
+    This exposes the kernel API for performing asynchronous flips
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Eric Anholt <eric@anholt.net>
+
+commit 45810d3d7546f3ddbcdae114c6726ada30e919c9
+Author: Kenneth Graunke <kenneth@whitecape.org>
+Date:   Tue Oct 29 20:41:16 2013 -0700
+
+    intel: Add MI_LOAD_REGISTER_MEM to intel_decode.c.
+    
+    Signed-off-by: Kenneth Graunke <kenneth@whitecape.org>
+    Reviewed-by: Ben Widawsky <benjamin.widawsky@intel.com>
+
+commit 551aac43750714bded31f9331da0b13280cc5832
+Author: Kenneth Graunke <kenneth@whitecape.org>
+Date:   Tue Oct 29 19:30:45 2013 -0700
+
+    intel: Add the Gen6+ version of MI_REPORT_PERF_COUNT to intel_decode.c.
+    
+    Signed-off-by: Kenneth Graunke <kenneth@whitecape.org>
+    Reviewed-by: Ben Widawsky <benjamin.widawsky@intel.com>
+
+commit 951ebe0081bd2e15bc7685f07fa3318fa5bccfad
+Author: Ben Widawsky <benjamin.widawsky@intel.com>
+Date:   Fri Oct 11 09:47:45 2013 -0700
+
+    libdrm: bump to 2.4.47
+
+commit 9c52c3dc4763336884277d8005eac7e6efb77600
+Author: Kristian Høgsberg <krh@bitplanet.net>
+Date:   Thu Oct 10 14:40:58 2013 -0700
+
+    intel: Set bo size from lseek if kernel supports it
+    
+    The various create and open functions set the buffer size, but
+    drm_intel_bo_gem_create_from_prime() is an exception.  In the 3.12 kernel
+    we can now use lseek on the prime fd to determine the size of the bo.
+    Use that and override the userprovided size.  If the kernel doesn't
+    support this, we get an error and fall back to the user provided size.
+    
+    Signed-off-by: Kristian Høgsberg <krh@bitplanet.net>
+
+commit ddbbdb13d80ea7f60e6f71356a444995b905366b
+Author: Damien Lespiau <damien.lespiau@intel.com>
+Date:   Tue Sep 3 15:34:41 2013 +0100
+
+    drm: Introduce a drmSetClientCap() wrapper
+    
+    That wraps around the new DRM_SET_CLIENT_CAP ioctl.
+    
+    v2: SET_CAP -> SET_CLIENT_CAP renaming
+    
+    Signed-off-by: Damien Lespiau <damien.lespiau@intel.com>
+
+commit 2dd7054781876a0d5423c7755a7690815f3c2f5f
+Author: Damien Lespiau <damien.lespiau@intel.com>
+Date:   Tue Sep 3 15:31:49 2013 +0100
+
+    drm: Sync the DRM_SET_CLIENT_CAP ioctl definition
+    
+    v2: SET_CAP -> SET_CLIENT_CAP renaming
+    
+    Signed-off-by: Damien Lespiau <damien.lespiau@intel.com>
+
+commit edf5c7cde5e10067076cbf79c0cc5d71aa78d7e2
+Author: Damien Lespiau <damien.lespiau@intel.com>
+Date:   Fri Aug 23 15:57:40 2013 +0100
+
+    drm: Synchronize the stereo 3D mode flags from the kernel headers
+    
+    v2: stereo layouts are now an enum (Daniel Vetter)
+    
+    Signed-off-by: Damien Lespiau <damien.lespiau@intel.com>
+
+commit 75f747b919e1b1cd852eeaa8e662e72273189fb2
+Author: Marek Olšák <marek.olsak@amd.com>
+Date:   Thu Sep 19 14:19:02 2013 +0200
+
+    radeon: fix pitch alignment for non-power-of-two mipmaps on SI
+    
+    This fixes VM protection faults.
+    
+    I have a new piglit test which can iterate over all possible widths, heights,
+    and depths (including NPOT) and tests mipmapping with various texture targets.
+    
+    After this is committed, I'll make a new release of libdrm and bump
+    the libdrm version requirement in Mesa.
+
+commit bf4a7cd4b2456d4dc93a86bbcc51eba4ae73390a
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Thu Sep 19 17:21:01 2013 +0100
+
+    configure: add AC_LANG_SOURCE call within AC_COMPILE_IFELSE
+    
+    Documentation states that AC_*_IFELSE has to use AC_LANG_SOURCE or
+    friends in order to generate the source code to compile.
+    AC_LINK_IFELSE already handles this, thus convert AC_COMPILE_IFELSE
+    to silence the final autoconf warnings.
+    
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+    Signed-off-by: Eric Anholt <eric@anholt.net>
+    Reviewed-by: Daniel Kurtz <djkurtz@chromium.org>
+
+commit 0f4452bb51306024fbf4cbf77d8baab20cefba67
+Author: Daniel Kurtz <djkurtz@chromium.org>
+Date:   Mon Aug 26 23:39:16 2013 +0800
+
+    libdrm: Make some drm headers compatible with gcc -std=c89 -pedantic
+    
+    The following minor changes were needed to these headers:
+     * Convert // comments to /* */
+     * No , after final member of enum
+    
+    With these changes, these header files can be included by a program that
+    is built with gcc options:
+      -std=c89 -Werror -pedantic
+    
+    Signed-off-by: Daniel Kurtz <djkurtz@chromium.org>
+    Signed-off-by: Eric Anholt <eric@anholt.net>
+    Reviewed-by: Eric Anholt <eric@anholt.net>
+
+commit a48d6e5621fea701e36724cc144d9fe293332824
+Author: Michel Dänzer <michel.daenzer@amd.com>
+Date:   Wed Sep 18 15:43:05 2013 +0200
+
+    radeon: Fix tiling mode index for 1D tiled depth/stencil surfaces on CIK
+    
+    Reviewed-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit b6da447c04ea3f243b56dc964bc8d43bba003ae2
+Author: Rob Clark <robclark@freedesktop.org>
+Date:   Wed Sep 11 15:55:35 2013 -0400
+
+    freedreno: add missing NOSYNC flag
+    
+    Signed-off-by: Rob Clark <robclark@freedesktop.org>
+
+commit d8954154fe20036f442e249d964b575a7374c571
+Author: Ilia Mirkin <imirkin@alum.mit.edu>
+Date:   Sat Sep 7 21:36:02 2013 -0400
+
+    modetest: allow setting a scaling factor when showing plane
+    
+    Signed-off-by: Ilia Mirkin <imirkin@alum.mit.edu>
+    Reviewed-by: Rob Clark <robdclark@gmail.com>
+
+commit b50826dbd6a10e89ed03c23a16bf62e7d554a2d6
+Author: Ilia Mirkin <imirkin@alum.mit.edu>
+Date:   Sat Sep 7 21:36:01 2013 -0400
+
+    modetest: add a -D option to specify a device to be used
+    
+    This is helpful for differentiating between multiple devices that use
+    the same module.
+    
+    Signed-off-by: Ilia Mirkin <imirkin@alum.mit.edu>
+    Reviewed-by: Rob Clark <robdclark@gmail.com>
+
+commit 58d008883165ba35c83041fa9ed84937163d5f76
+Author: Alex Deucher <alexander.deucher@amd.com>
+Date:   Fri Sep 6 15:58:56 2013 -0400
+
+    radeon: pad CS to 8 DW
+    
+    Aligns the IB to 8 DWs.  The aligns the IB to the
+    CP fetch size.  r6xx also require at least 4 DW
+    alignment to avoid a hw bug.
+    
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit 8a2e0fa917996e72bfc0dbdf228fc0bfb433d279
+Author: Alex Deucher <alexander.deucher@amd.com>
+Date:   Thu Jan 24 18:12:21 2013 -0500
+
+    radeon: add berlin pci ids
+    
+    Signed-off-by: Alex Deucher <alexander.deucher@amd.com>
+
+commit d18cd0c7ccf88c9f6585aaa3cc57f0f064d7310b
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Thu Aug 29 21:31:54 2013 +0100
+
+    intel: Update package name and description in libdrm_intel.pc
+    
+    Currently the package name and description duplicate that of the
+    core libdrm. Update those to reflect reality.
+    
+    Cc: Daniel Vetter <daniel.vetter@ffwll.ch>
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+    Reviewed-by: Damien Lespiau <damien.lespiau@intel.com>
+
+commit db6a1b07d06ad7b663f28291a6be8226bd05d421
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Thu Aug 29 21:31:53 2013 +0100
+
+    freedreno: set automake options to include subdir-objects
+    
+    Handles automake complains about lack of forward-compatibility, due to the
+    source files in the kgsl and msm backends/folders.
+    
+    Cc: Rob Clark <robclark@freedesktop.org>
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+
+commit 126c45828aa3eaf1f404a4fc65a09a93fda76467
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Thu Aug 29 21:31:52 2013 +0100
+
+    freedreno: use local drm.h over the system one
+    
+    Otherwise build will fail, as drm/drm.h is not available.
+    
+    Cc: Rob Clark <robclark@freedesktop.org>
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+
+commit 4a8da02e524d5d70ec638477e36fcafd2c8152ec
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Thu Aug 29 21:31:51 2013 +0100
+
+    tests/modetest: silence compiler warning about uninitialised variables
+    
+    The compiler is unaware of that we have at least one crts/connector/plane
+    thus it complains that some of our variables will be used uninitialised.
+    
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+    Reviewed-by: Rob Clark <robdclark@gmail.com>
+
+commit 0100473de648f29dd5abbd3fabd0f73c0bd5bfd5
+Author: Emil Velikov <emil.l.velikov@gmail.com>
+Date:   Thu Aug 29 21:31:50 2013 +0100
+
+    tests/*version: add missing string.h header
+    
+    Prodives memset() and strlen(), used in tests/setversion
+    tests/getversion respectively.
+    
+    Signed-off-by: Emil Velikov <emil.l.velikov@gmail.com>
+    Reviewed-by: Rob Clark <robdclark@gmail.com>
+
+commit dba6bec3ab5ba966a6ee3527e711c51e47229f32
+Author: Rob Clark <robclark@freedesktop.org>
+Date:   Fri Aug 30 11:15:30 2013 -0400
+
+    tests: add msm
+    
+    Signed-off-by: Rob Clark <robclark@freedesktop.org>
+
+commit f17d417e28143176cb36b64e1b6a5818897e8154
+Author: Rob Clark <robclark@freedesktop.org>
+Date:   Sat Jul 20 20:35:31 2013 -0400
+
+    freedreno: add support for msm drm
+    
+    This adds support for the "msm" backend, using the upstream msm drm/kms
+    driver.
+    
+    Signed-off-by: Rob Clark <robclark@freedesktop.org>
+
+commit b2b1885dfcb3a206623e926704057b448d06781d
+Author: Rob Clark <robclark@freedesktop.org>
+Date:   Wed Jul 10 15:20:04 2013 -0400
+
+    freedreno: support either kgsl or msm
+    
+    Split out common code and backend.  Current backend is for 'kgsl'
+    android driver, but a new backend will provide support for the
+    upstream msm drm/kms driver.
+    
+    Signed-off-by: Rob Clark <robclark@freedesktop.org>
+
+commit 3c967e715528ee52195c178c4d09d03b643f0c06
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Fri Jun 14 22:57:49 2013 +0200
+
+    modetest: Allocate NV buffers large enough for the two planes
+    
+    Multiple the image height by 1.5 for NV12/NV21 and by 2 for NV16/NV61 to
+    make room for the chroma plane.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit 1ef179d09c465248db47f62f00e718f4911e0e34
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Fri Jun 14 22:57:30 2013 +0200
+
+    modetest: Fix line stride in SMPTE YUV packet pattern generator
+    
+    The line stride passed to the function is expressed in bytes, there's no
+    need to multiply it by 2.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit a4f2f1b9d1c0b6b7f740951525a14b3d328f0acf
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Tue Mar 19 15:36:09 2013 +0100
+
+    modetest: Try all possible encoders for a connector
+    
+    When building the pipeline, instead of using only the encoders attached
+    to a connector, take all possible encoders into account to locate a
+    CRTC.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit 2c5ee84d30cbd3fba61a8426b1e6bdd4f385de13
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Tue Mar 19 13:48:36 2013 +0100
+
+    modetest: Support pipes with multiple connectors
+    
+    The -s argument can now take a list of connectors. Configure all of them
+    in cloned mode using a single CRTC.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit b1e0bdeb70b68754c6c4ab1c7d0161709960d49c
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Tue Mar 19 13:47:39 2013 +0100
+
+    modetest: Rename struct connector_arg to struct pipe_arg
+    
+    This prepares the code for handling multiple connectors in a single
+    pipeline in a cloned configuration.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit 3813e0f8e1ee4885823cdd0b50b05970257adddc
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Wed Feb 27 05:35:13 2013 +0100
+
+    modetest: Split mode setting and plane setup
+    
+    There's not reason to require setting a mode to test planes. Split the
+    two operations.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit eabf199dffb0d42e959c50aa820b39228196e031
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Wed Feb 27 05:35:13 2013 +0100
+
+    modetest: Give the CRTC ID to the -P option
+    
+    Planes are associated with CRTCs, not connectors. Don't try to be too
+    clever, use the CRTC ID in the -P option. This prepares for splitting
+    CRTC and planes setup.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit 56592680bbb1bb73d08bdce317046d0401dcfba0
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Wed Feb 27 05:35:13 2013 +0100
+
+    modetest: Store the mode in the crtc structure
+    
+    This prepares the code for the split in separate functions of CRTC and
+    planes setup.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit a6349d0a0f9d3e017ac761ba912279c7d1e94eb7
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Wed Feb 27 05:35:13 2013 +0100
+
+    modetest: Store the crtc in the connector_arg structure
+    
+    This prepares the code for the split in separate functions of CRTC and
+    planes setup.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit b373de3095e7518d62cfc99a1b22da8dc3435a88
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Wed Feb 27 05:35:13 2013 +0100
+
+    modetest: Remove the struct connector_arg encoder field
+    
+    The field is no needed, make it a local variable where used.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit 605efd7e05e94b8d9d742d3a8af1040776e2742d
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Wed Feb 27 05:35:13 2013 +0100
+
+    modetest: Compute CRTC pipe number as needed
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit 549fe0ba627a67b6ae1334eb5cf274a3dfb1fd69
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Wed Feb 27 05:35:13 2013 +0100
+
+    modetest: Create a device structure
+    
+    Instead of passing the device fd and resources as global variables group
+    them in a device structure and pass it explictly to all functions that
+    need it.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit dab3c80203e562cfdbe33e7d1627c9dde2f5a7de
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Wed Feb 27 05:35:13 2013 +0100
+
+    modetest: Remove the -m argument
+    
+    The argument isn't used, remove it.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit 581c7cf86a96a81e76288c8abca03c7f29eac3af
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Wed Feb 27 05:35:13 2013 +0100
+
+    modetest: Print the plane ID when setting up a plane
+    
+    As modetest automatically selects an unused plan, providing the plane ID
+    allows modifying plane properties for the selected planes.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit 7badcca4925480ffdc4f3aa5efb88624ce451e70
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Wed Feb 27 05:35:13 2013 +0100
+
+    modetest: Allow specifying plane position
+    
+    Extend the -P option to allow specifying the plane x and y offsets. The
+    position is optional, if not specified the plane will be positioned at
+    the center of the screen as before.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit d725227cec822b8cfbeb541be17aae30b7612b9f
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Wed Feb 27 05:35:13 2013 +0100
+
+    modetest: Add a command line parameter to set properties
+    
+    The -w parameter can be used to set a property value from the command
+    line, using the target object ID and the property name.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit 6e0c74c5f8860748f03dad4548d3ef2cf2df5489
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Fri Mar 1 02:28:42 2013 +0100
+
+    modetest: Don't limit mode set and planes to two instances
+    
+    Configuring mode on more than two connectors or two planes is perfectly
+    valid. Support it.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit 02fa8f79b05456184028f014432647b19601a288
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Wed Feb 27 06:39:36 2013 +0100
+
+    modetest: Retrieve all resources in one go
+    
+    Instead of retrieving resources as they are needed, retrieve them all
+    (except property blobs) in one go at startup.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit ab52756a3632fdc38a915a9bbda0b2089b09e38e
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Wed Feb 27 05:19:44 2013 +0100
+
+    modetest: Add a command line parameter to drop master after mode set
+    
+    If the -d parameter is specified, modetest will drop master permissions
+    after setting the mode.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit 45901fdae66441ffec681e3dbd46b5530107a045
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Fri Feb 8 13:42:45 2013 +0100
+
+    modetest: Add a command line parameter to select the driver
+    
+    If the -M parameter is specified, modetest will use the requested device
+    name instead of trying its builtin list of device names.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+    Reviewed-by: Jani Nikula <jani.nikula@intel.com>
+
+commit ef07acf5b79f86ef86efe6e72c1de5726c97e41d
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Fri Feb 8 11:12:03 2013 +0100
+
+    modetest: Sort command line arguments
+    
+    The current mostly random sort order hinders code readability. Sort the
+    options alphabetically in the code, and by group in the help message.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+    Reviewed-by: Jani Nikula <jani.nikula@intel.com>
+
+commit c93f4af0588d02c411d1526193ba1d63f76551b5
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Fri Feb 8 11:08:38 2013 +0100
+
+    modetest: Remove extern declarations of opt(arg|ind|err|opt)
+    
+    Those variables are declared in unistd.h, there's no need to redeclare
+    them here.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+    Reviewed-by: Jani Nikula <jani.nikula@intel.com>
+
+commit ca9c8f06e0f560082dcd0943e9be29ba9a915ee3
+Author: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Date:   Mon Feb 11 21:36:30 2013 +0100
+
+    modetest: Fix warnings
+    
+    Enable all standard automake warnings except for -Wpointer-arith (as the
+    test pattern generation code uses void pointer arithmetics) and fix
+    them.
+    
+    Signed-off-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+commit 6e8f868e034531b66a215e4e6d978b43b58b92d0
+Author: Rob Clark <robclark@freedesktop.org>
+Date:   Thu Aug 1 17:52:13 2013 -0400
+
+    tests: add tilcdc to modetest/vbltest
+    
+    Signed-off-by: Rob Clark <robclark@freedesktop.org>
+
+commit fea5408098c3c3057958e85ea9d7146f0b08749e
+Author: Chia-I Wu <olvaffe@gmail.com>
+Date:   Wed Jul 10 10:49:59 2013 +0800
+
+    intel: silence valgrind warnings for unsynchronized maps
+    
+    Mark the address ranges as accessible with VALGRIND_MAKE_MEM_DEFINED.
+    
+    Signed-off-by: Chia-I Wu <olvaffe@gmail.com>
+    Signed-off-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+
+commit f8f1f6e37ae2c3eb4a9c045ba3294b3ccf926c07
+Author: Imre Deak <imre.deak@intel.com>
+Date:   Thu Nov 22 16:00:39 2012 +0200
+
+    libdrm: add missing DRM_CAP_TIMESTAMP_MONOTONIC
+    
+    Just add the definition according the kernel's copy of drm.h
+    
+    Signed-off-by: Imre Deak <imre.deak@intel.com>
+
 commit c6d73cfeeaff9596c735d0a10b248f94b2e1e347
 Author: Dave Airlie <airlied@redhat.com>
 Date:   Tue Jul 2 09:24:53 2013 +0100
