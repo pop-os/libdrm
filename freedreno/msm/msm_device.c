@@ -1,7 +1,7 @@
 /* -*- mode: C; c-file-style: "k&r"; tab-width 4; indent-tabs-mode: t; -*- */
 
 /*
- * Copyright (C) 2012 Rob Clark <robclark@freedesktop.org>
+ * Copyright (C) 2013 Rob Clark <robclark@freedesktop.org>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -26,46 +26,36 @@
  *    Rob Clark <robclark@freedesktop.org>
  */
 
-#include "freedreno_drmif.h"
-#include "freedreno_priv.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
-struct fd_pipe * fd_pipe_new(struct fd_device *dev, enum fd_pipe_id id)
+#include "msm_priv.h"
+
+static void msm_device_destroy(struct fd_device *dev)
 {
-	struct fd_pipe *pipe = NULL;
-
-	if (id > FD_PIPE_MAX) {
-		ERROR_MSG("invalid pipe id: %d", id);
-		goto fail;
-	}
-
-	pipe = dev->funcs->pipe_new(dev, id);
-	if (!pipe) {
-		ERROR_MSG("allocation failed");
-		goto fail;
-	}
-
-	pipe->dev = dev;
-	pipe->id = id;
-
-	return pipe;
-fail:
-	if (pipe)
-		fd_pipe_del(pipe);
-	return NULL;
+	struct msm_device *msm_dev = to_msm_device(dev);
+	free(msm_dev);
 }
 
-void fd_pipe_del(struct fd_pipe *pipe)
-{
-	pipe->funcs->destroy(pipe);
-}
+static struct fd_device_funcs funcs = {
+		.bo_new_handle = msm_bo_new_handle,
+		.bo_from_handle = msm_bo_from_handle,
+		.pipe_new = msm_pipe_new,
+		.destroy = msm_device_destroy,
+};
 
-int fd_pipe_get_param(struct fd_pipe *pipe, enum fd_param_id param,
-		uint64_t *value)
+struct fd_device * msm_device_new(int fd)
 {
-	return pipe->funcs->get_param(pipe, param, value);
-}
+	struct msm_device *msm_dev;
+	struct fd_device *dev;
 
-int fd_pipe_wait(struct fd_pipe *pipe, uint32_t timestamp)
-{
-	return pipe->funcs->wait(pipe, timestamp);
+	msm_dev = calloc(1, sizeof(*msm_dev));
+	if (!msm_dev)
+		return NULL;
+
+	dev = &msm_dev->base;
+	dev->funcs = &funcs;
+
+	return dev;
 }

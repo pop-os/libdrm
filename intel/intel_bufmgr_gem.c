@@ -1322,6 +1322,7 @@ int drm_intel_gem_bo_map_gtt(drm_intel_bo *bo)
 int drm_intel_gem_bo_map_unsynchronized(drm_intel_bo *bo)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *) bo->bufmgr;
+	drm_intel_bo_gem *bo_gem = (drm_intel_bo_gem *) bo;
 	int ret;
 
 	/* If the CPU cache isn't coherent with the GTT, then use a
@@ -1335,7 +1336,13 @@ int drm_intel_gem_bo_map_unsynchronized(drm_intel_bo *bo)
 		return drm_intel_gem_bo_map_gtt(bo);
 
 	pthread_mutex_lock(&bufmgr_gem->lock);
+
 	ret = map_gtt(bo);
+	if (ret == 0) {
+		drm_intel_gem_bo_mark_mmaps_incoherent(bo);
+		VG(VALGRIND_MAKE_MEM_DEFINED(bo_gem->gtt_virtual, bo->size));
+	}
+
 	pthread_mutex_unlock(&bufmgr_gem->lock);
 
 	return ret;
@@ -1937,12 +1944,14 @@ aub_write_trace_block(drm_intel_bo *bo, uint32_t type, uint32_t subtype,
 
 	aub_out(bufmgr_gem,
 		CMD_AUB_TRACE_HEADER_BLOCK |
-		(5 - 2));
+		((bufmgr_gem->gen >= 8 ? 6 : 5) - 2));
 	aub_out(bufmgr_gem,
 		AUB_TRACE_MEMTYPE_GTT | type | AUB_TRACE_OP_DATA_WRITE);
 	aub_out(bufmgr_gem, subtype);
 	aub_out(bufmgr_gem, bo_gem->aub_offset + offset);
 	aub_out(bufmgr_gem, size);
+	if (bufmgr_gem->gen >= 8)
+		aub_out(bufmgr_gem, 0);
 	aub_write_bo_data(bo, offset, size);
 }
 
@@ -2019,20 +2028,28 @@ aub_build_dump_ringbuffer(drm_intel_bufmgr_gem *bufmgr_gem,
 
 	/* Make a ring buffer to execute our batchbuffer. */
 	memset(ringbuffer, 0, sizeof(ringbuffer));
-	ringbuffer[ring_count++] = AUB_MI_BATCH_BUFFER_START;
-	ringbuffer[ring_count++] = batch_buffer;
+	if (bufmgr_gem->gen >= 8) {
+		ringbuffer[ring_count++] = AUB_MI_BATCH_BUFFER_START | (3 - 2);
+		ringbuffer[ring_count++] = batch_buffer;
+		ringbuffer[ring_count++] = 0;
+	} else {
+		ringbuffer[ring_count++] = AUB_MI_BATCH_BUFFER_START;
+		ringbuffer[ring_count++] = batch_buffer;
+	}
 
 	/* Write out the ring.  This appears to trigger execution of
 	 * the ring in the simulator.
 	 */
 	aub_out(bufmgr_gem,
 		CMD_AUB_TRACE_HEADER_BLOCK |
-		(5 - 2));
+		((bufmgr_gem->gen >= 8 ? 6 : 5) - 2));
 	aub_out(bufmgr_gem,
 		AUB_TRACE_MEMTYPE_GTT | ring | AUB_TRACE_OP_COMMAND_WRITE);
 	aub_out(bufmgr_gem, 0); /* general/surface subtype */
 	aub_out(bufmgr_gem, bufmgr_gem->aub_offset);
 	aub_out(bufmgr_gem, ring_count * 4);
+	if (bufmgr_gem->gen >= 8)
+		aub_out(bufmgr_gem, 0);
 
 	/* FIXME: Need some flush operations here? */
 	aub_out_data(bufmgr_gem, ringbuffer, ring_count * 4);
@@ -2445,7 +2462,17 @@ drm_intel_bo_gem_create_from_prime(drm_intel_bufmgr *bufmgr, int prime_fd, int s
 	if (!bo_gem)
 		return NULL;
 
-	bo_gem->bo.size = size;
+	/* Determine size of bo.  The fd-to-handle ioctl really should
+	 * return the size, but it doesn't.  If we have kernel 3.12 or
+	 * later, we can lseek on the prime fd to get the size.  Older
+	 * kernels will just fail, in which case we fall back to the
+	 * provided (estimated or guess size). */
+	ret = lseek(prime_fd, 0, SEEK_END);
+	if (ret != -1)
+		bo_gem->bo.size = ret;
+	else
+		bo_gem->bo.size = size;
+
 	bo_gem->bo.handle = handle;
 	bo_gem->bo.bufmgr = bufmgr;
 
@@ -2935,11 +2962,13 @@ drm_intel_bufmgr_gem_set_aub_dump(drm_intel_bufmgr *bufmgr, int enable)
 	aub_out(bufmgr_gem, 0); /* comment len */
 
 	/* Set up the GTT. The max we can handle is 256M */
-	aub_out(bufmgr_gem, CMD_AUB_TRACE_HEADER_BLOCK | (5 - 2));
+	aub_out(bufmgr_gem, CMD_AUB_TRACE_HEADER_BLOCK | ((bufmgr_gem->gen >= 8 ? 6 : 5) - 2));
 	aub_out(bufmgr_gem, AUB_TRACE_MEMTYPE_NONLOCAL | 0 | AUB_TRACE_OP_DATA_WRITE);
 	aub_out(bufmgr_gem, 0); /* subtype */
 	aub_out(bufmgr_gem, 0); /* offset */
 	aub_out(bufmgr_gem, gtt_size); /* size */
+	if (bufmgr_gem->gen >= 8)
+		aub_out(bufmgr_gem, 0);
 	for (i = 0x000; i < gtt_size; i += 4, entry += 0x1000) {
 		aub_out(bufmgr_gem, entry);
 	}
@@ -2989,6 +3018,40 @@ drm_intel_gem_context_destroy(drm_intel_context *ctx)
 			strerror(errno));
 
 	free(ctx);
+}
+
+int
+drm_intel_get_reset_stats(drm_intel_context *ctx,
+			  uint32_t *reset_count,
+			  uint32_t *active,
+			  uint32_t *pending)
+{
+	drm_intel_bufmgr_gem *bufmgr_gem;
+	struct drm_i915_reset_stats stats;
+	int ret;
+
+	if (ctx == NULL)
+		return -EINVAL;
+
+	memset(&stats, 0, sizeof(stats));
+
+	bufmgr_gem = (drm_intel_bufmgr_gem *)ctx->bufmgr;
+	stats.ctx_id = ctx->ctx_id;
+	ret = drmIoctl(bufmgr_gem->fd,
+		       DRM_IOCTL_I915_GET_RESET_STATS,
+		       &stats);
+	if (ret == 0) {
+		if (reset_count != NULL)
+			*reset_count = stats.reset_count;
+
+		if (active != NULL)
+			*active = stats.batch_active;
+
+		if (pending != NULL)
+			*pending = stats.batch_pending;
+	}
+
+	return ret;
 }
 
 int
@@ -3107,6 +3170,8 @@ drm_intel_bufmgr_gem_init(int fd, int batch_size)
 		bufmgr_gem->gen = 6;
 	else if (IS_GEN7(bufmgr_gem->pci_device))
 		bufmgr_gem->gen = 7;
+	else if (IS_GEN8(bufmgr_gem->pci_device))
+		bufmgr_gem->gen = 8;
 	else {
 		free(bufmgr_gem);
 		return NULL;
