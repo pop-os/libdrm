@@ -1,3 +1,13 @@
+commit c8a437f4c76527b3c8385699ccee07f35fe3f166
+Author: Michel Dänzer <michel.daenzer@amd.com>
+Date:   Tue Nov 26 18:16:03 2013 +0900
+
+    radeon: Update unaligned offset for 2D->1D tiling transition on SI
+    
+    Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=71983
+    
+    Tested-by: Arek Ruśniak <arek.rusi@gmail.com>
+
 commit 7ddc98f92f92560e2b52287ae8cf816ca4a057de
 Author: Marek Olšák <marek.olsak@amd.com>
 Date:   Sat Nov 23 01:27:57 2013 +0100
