@@ -1,3 +1,27 @@
+commit 4c5de721c4ef96ef412fd6af4cb415f04a7515f6
+Author: Marek Olšák <marek.olsak@amd.com>
+Date:   Tue Dec 3 19:50:22 2013 +0100
+
+    Bump the version to 2.4.50
+
+commit c3d96897de647bd5f6d4802c108a3f65a307d61b
+Author: Keith Packard <keithp@keithp.com>
+Date:   Fri Nov 22 05:31:01 2013 -0800
+
+     intel: Track known prime buffers for re-use
+    
+    If the application sends us a file descriptor pointing at a prime
+    buffer that we've already got, we have to re-use the same bo_gem
+    structure or chaos will result.
+    
+    Track the set of all known prime objects and look to see if the kernel
+    has returned one of those for a new file descriptor.
+    
+    Also checks for prime buffers in the flink case.
+    
+    Signed-off-by: Keith Packard <keithp@keithp.com>
+    Reviewed-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+
 commit c8a437f4c76527b3c8385699ccee07f35fe3f166
 Author: Michel Dänzer <michel.daenzer@amd.com>
 Date:   Tue Nov 26 18:16:03 2013 +0900
