@@ -158,8 +158,8 @@ static int g2d_flush(struct g2d_context *ctx)
 
 	memset(&cmdlist, 0, sizeof(struct drm_exynos_g2d_set_cmdlist));
 
-	cmdlist.cmd = (unsigned int)&ctx->cmd[0];
-	cmdlist.cmd_buf = (unsigned int)&ctx->cmd_buf[0];
+	cmdlist.cmd = (uint64_t)(uintptr_t)&ctx->cmd[0];
+	cmdlist.cmd_buf = (uint64_t)(uintptr_t)&ctx->cmd_buf[0];
 	cmdlist.cmd_nr = ctx->cmd_nr;
 	cmdlist.cmd_buf_nr = ctx->cmd_buf_nr;
 	cmdlist.event_type = G2D_EVENT_NOT;
@@ -382,7 +382,7 @@ int g2d_copy(struct g2d_context *ctx, struct g2d_image *src,
 	g2d_add_cmd(ctx, DST_LEFT_TOP_REG, pt.val);
 	pt.val = 0;
 	pt.data.x = dst_x + w;
-	pt.data.y = dst_x + h;
+	pt.data.y = dst_y + h;
 	g2d_add_cmd(ctx, DST_RIGHT_BOTTOM_REG, pt.val);
 
 	rop4.val = 0;
@@ -451,7 +451,7 @@ int g2d_copy_with_scale(struct g2d_context *ctx, struct g2d_image *src,
 	else {
 		scale = 1;
 		scale_x = (double)src_w / (double)dst_w;
-		scale_y = (double)src_w / (double)dst_h;
+		scale_y = (double)src_h / (double)dst_h;
 	}
 
 	if (src_x + src_w > src->width)
