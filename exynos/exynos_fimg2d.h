@@ -13,19 +13,10 @@
 #ifndef _FIMG2D_H_
 #define _FIMG2D_H_
 
-#ifndef TRUE
-#define TRUE 0
-#endif
-#ifndef FALSE
-#define FALSE -1
-#endif
-
 #define G2D_MAX_CMD_NR		64
 #define G2D_MAX_GEM_CMD_NR	64
 #define G2D_MAX_CMD_LIST_NR	64
 #define G2D_PLANE_MAX_NR	2
-
-#define G2D_DOUBLE_TO_FIXED(d)		((unsigned int)((d) * 65536.0))
 
 enum e_g2d_color_mode {
 	/* COLOR FORMAT */
@@ -151,6 +142,7 @@ enum e_g2d_op {
 	G2D_OP_SRC			= 0x01,
 	G2D_OP_DST			= 0x02,
 	G2D_OP_OVER			= 0x03,
+	G2D_OP_INTERPOLATE		= 0x04,
 	G2D_OP_DISJOINT_CLEAR		= 0x10,
 	G2D_OP_DISJOINT_SRC		= 0x11,
 	G2D_OP_DISJOINT_DST		= 0x12,
@@ -159,6 +151,12 @@ enum e_g2d_op {
 	G2D_OP_CONJOINT_DST		= 0x22,
 };
 
+/*
+ * The G2D_COEFF_MODE_DST_{COLOR,ALPHA} modes both use the ALPHA_REG(0x618)
+ * register. The registers fields are as follows:
+ * bits 31:8 = color value (RGB order)
+ * bits 7:0 = alpha value
+ */
 enum e_g2d_coeff_mode {
 	G2D_COEFF_MODE_ONE,
 	G2D_COEFF_MODE_ZERO,
@@ -168,7 +166,7 @@ enum e_g2d_coeff_mode {
 	G2D_COEFF_MODE_DST_COLOR,
 	/* Global Alpha : Set by ALPHA_REG(0x618) */
 	G2D_COEFF_MODE_GB_ALPHA,
-	/* Global Alpha : Set by ALPHA_REG(0x618) */
+	/* Global Color and Alpha : Set by ALPHA_REG(0x618) */
 	G2D_COEFF_MODE_GB_COLOR,
 	/* (1-SRC alpha)/DST Alpha */
 	G2D_COEFF_MODE_DISJOINT_S,
@@ -322,4 +320,9 @@ int g2d_blend(struct g2d_context *ctx, struct g2d_image *src,
 		struct g2d_image *dst, unsigned int src_x,
 		unsigned int src_y, unsigned int dst_x, unsigned int dst_y,
 		unsigned int w, unsigned int h, enum e_g2d_op op);
+int g2d_scale_and_blend(struct g2d_context *ctx, struct g2d_image *src,
+		struct g2d_image *dst, unsigned int src_x, unsigned int src_y,
+		unsigned int src_w, unsigned int src_h, unsigned int dst_x,
+		unsigned int dst_y, unsigned int dst_w, unsigned int dst_h,
+		enum e_g2d_op op);
 #endif /* _FIMG2D_H_ */
