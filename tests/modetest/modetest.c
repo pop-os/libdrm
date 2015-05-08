@@ -50,6 +50,7 @@
 #include <inttypes.h>
 #include <unistd.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
 #include <sys/poll.h>
 #include <sys/time.h>
@@ -110,6 +111,7 @@ struct device {
 
 		unsigned int fb_id;
 		struct bo *bo;
+		struct bo *cursor_bo;
 	} mode;
 };
 
@@ -140,6 +142,9 @@ struct type_name encoder_type_names[] = {
 	{ DRM_MODE_ENCODER_TMDS, "TMDS" },
 	{ DRM_MODE_ENCODER_LVDS, "LVDS" },
 	{ DRM_MODE_ENCODER_TVDAC, "TVDAC" },
+	{ DRM_MODE_ENCODER_VIRTUAL, "Virtual" },
+	{ DRM_MODE_ENCODER_DSI, "DSI" },
+	{ DRM_MODE_ENCODER_DPMST, "DPMST" },
 };
 
 static type_name_fn(encoder_type)
@@ -168,6 +173,8 @@ struct type_name connector_type_names[] = {
 	{ DRM_MODE_CONNECTOR_HDMIB, "HDMI-B" },
 	{ DRM_MODE_CONNECTOR_TV, "TV" },
 	{ DRM_MODE_CONNECTOR_eDP, "eDP" },
+	{ DRM_MODE_CONNECTOR_VIRTUAL, "Virtual" },
+	{ DRM_MODE_CONNECTOR_DSI, "DSI" },
 };
 
 static type_name_fn(connector_type)
@@ -730,6 +737,7 @@ struct plane_arg {
 	uint32_t w, h;
 	double scale;
 	unsigned int fb_id;
+	struct bo *bo;
 	char format_str[5]; /* need to leave room for terminating \0 */
 	unsigned int fourcc;
 };
@@ -964,7 +972,7 @@ page_flip_handler(int fd, unsigned int frame,
 static int set_plane(struct device *dev, struct plane_arg *p)
 {
 	drmModePlane *ovr;
-	uint32_t handles[4], pitches[4], offsets[4] = {0}; /* we only use [0] */
+	uint32_t handles[4] = {0}, pitches[4] = {0}, offsets[4] = {0};
 	uint32_t plane_id = 0;
 	struct bo *plane_bo;
 	uint32_t plane_flags = 0;
@@ -1012,6 +1020,8 @@ static int set_plane(struct device *dev, struct plane_arg *p)
 	if (plane_bo == NULL)
 		return -1;
 
+	p->bo = plane_bo;
+
 	/* just use single plane format for now.. */
 	if (drmModeAddFB2(dev->fd, p->w, p->h, p->fourcc,
 			handles, pitches, offsets, &p->fb_id, plane_flags)) {
@@ -1044,9 +1054,22 @@ static int set_plane(struct device *dev, struct plane_arg *p)
 	return 0;
 }
 
+static void clear_planes(struct device *dev, struct plane_arg *p, unsigned int count)
+{
+	unsigned int i;
+
+	for (i = 0; i < count; i++) {
+		if (p[i].fb_id)
+			drmModeRmFB(dev->fd, p[i].fb_id);
+		if (p[i].bo)
+			bo_destroy(p[i].bo);
+	}
+}
+
+
 static void set_mode(struct device *dev, struct pipe_arg *pipes, unsigned int count)
 {
-	uint32_t handles[4], pitches[4], offsets[4] = {0}; /* we only use [0] */
+	uint32_t handles[4] = {0}, pitches[4] = {0}, offsets[4] = {0};
 	unsigned int fb_id;
 	struct bo *bo;
 	unsigned int i;
@@ -1055,6 +1078,7 @@ static void set_mode(struct device *dev, struct pipe_arg *pipes, unsigned int co
 
 	dev->mode.width = 0;
 	dev->mode.height = 0;
+	dev->mode.fb_id = 0;
 
 	for (i = 0; i < count; i++) {
 		struct pipe_arg *pipe = &pipes[i];
@@ -1073,6 +1097,8 @@ static void set_mode(struct device *dev, struct pipe_arg *pipes, unsigned int co
 	if (bo == NULL)
 		return;
 
+	dev->mode.bo = bo;
+
 	ret = drmModeAddFB2(dev->fd, dev->mode.width, dev->mode.height,
 			    pipes[0].fourcc, handles, pitches, offsets, &fb_id, 0);
 	if (ret) {
@@ -1080,6 +1106,8 @@ static void set_mode(struct device *dev, struct pipe_arg *pipes, unsigned int co
 			dev->mode.width, dev->mode.height, strerror(errno));
 		return;
 	}
+
+	dev->mode.fb_id = fb_id;
 
 	x = 0;
 	for (i = 0; i < count; i++) {
@@ -1108,9 +1136,14 @@ static void set_mode(struct device *dev, struct pipe_arg *pipes, unsigned int co
 			return;
 		}
 	}
+}
 
-	dev->mode.bo = bo;
-	dev->mode.fb_id = fb_id;
+static void clear_mode(struct device *dev)
+{
+	if (dev->mode.fb_id)
+		drmModeRmFB(dev->fd, dev->mode.fb_id);
+	if (dev->mode.bo)
+		bo_destroy(dev->mode.bo);
 }
 
 static void set_planes(struct device *dev, struct plane_arg *p, unsigned int count)
@@ -1125,7 +1158,7 @@ static void set_planes(struct device *dev, struct plane_arg *p, unsigned int cou
 
 static void set_cursors(struct device *dev, struct pipe_arg *pipes, unsigned int count)
 {
-	uint32_t handles[4], pitches[4], offsets[4] = {0}; /* we only use [0] */
+	uint32_t handles[4] = {0}, pitches[4] = {0}, offsets[4] = {0};
 	struct bo *bo;
 	unsigned int i;
 	int ret;
@@ -1141,6 +1174,8 @@ static void set_cursors(struct device *dev, struct pipe_arg *pipes, unsigned int
 		       offsets, PATTERN_PLAIN);
 	if (bo == NULL)
 		return;
+
+	dev->mode.cursor_bo = bo;
 
 	for (i = 0; i < count; i++) {
 		struct pipe_arg *pipe = &pipes[i];
@@ -1161,11 +1196,14 @@ static void set_cursors(struct device *dev, struct pipe_arg *pipes, unsigned int
 static void clear_cursors(struct device *dev)
 {
 	cursor_stop();
+
+	if (dev->mode.cursor_bo)
+		bo_destroy(dev->mode.cursor_bo);
 }
 
 static void test_page_flip(struct device *dev, struct pipe_arg *pipes, unsigned int count)
 {
-	uint32_t handles[4], pitches[4], offsets[4] = {0}; /* we only use [0] */
+	uint32_t handles[4] = {0}, pitches[4] = {0}, offsets[4] = {0};
 	unsigned int other_fb_id;
 	struct bo *other_bo;
 	drmEventContext evctx;
@@ -1183,7 +1221,7 @@ static void test_page_flip(struct device *dev, struct pipe_arg *pipes, unsigned 
 			    &other_fb_id, 0);
 	if (ret) {
 		fprintf(stderr, "failed to add fb: %s\n", strerror(errno));
-		return;
+		goto err;
 	}
 
 	for (i = 0; i < count; i++) {
@@ -1197,7 +1235,7 @@ static void test_page_flip(struct device *dev, struct pipe_arg *pipes, unsigned 
 				      pipe);
 		if (ret) {
 			fprintf(stderr, "failed to page flip: %s\n", strerror(errno));
-			return;
+			goto err_rmfb;
 		}
 		gettimeofday(&pipe->start, NULL);
 		pipe->swap_count = 0;
@@ -1249,6 +1287,9 @@ static void test_page_flip(struct device *dev, struct pipe_arg *pipes, unsigned 
 		drmHandleEvent(dev->fd, &evctx);
 	}
 
+err_rmfb:
+	drmModeRmFB(dev->fd, other_fb_id);
+err:
 	bo_destroy(other_bo);
 }
 
@@ -1453,7 +1494,7 @@ int main(int argc, char **argv)
 	int drop_master = 0;
 	int test_vsync = 0;
 	int test_cursor = 0;
-	const char *modules[] = { "i915", "radeon", "nouveau", "vmwgfx", "omapdrm", "exynos", "tilcdc", "msm", "sti", "tegra", "imx-drm" };
+	const char *modules[] = { "i915", "radeon", "nouveau", "vmwgfx", "omapdrm", "exynos", "tilcdc", "msm", "sti", "tegra", "imx-drm", "rockchip" };
 	char *device = NULL;
 	char *module = NULL;
 	unsigned int i;
@@ -1504,6 +1545,7 @@ int main(int argc, char **argv)
 			if (parse_plane(&plane_args[plane_count], optarg) < 0)
 				usage(argv[0]);
 
+			plane_args[plane_count].fb_id = 0;
 			plane_count++;
 			break;
 		case 'p':
@@ -1636,7 +1678,11 @@ int main(int argc, char **argv)
 		if (test_cursor)
 			clear_cursors(&dev);
 
-		bo_destroy(dev.mode.bo);
+		if (plane_count)
+			clear_planes(&dev, plane_args, plane_count);
+
+		if (count)
+			clear_mode(&dev);
 	}
 
 	free_resources(dev.resources);

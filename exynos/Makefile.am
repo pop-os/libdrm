@@ -1,8 +1,6 @@
 AM_CFLAGS = \
 	$(WARN_CFLAGS) \
-	$(VISIBILITY_CFLAGS) \
 	-I$(top_srcdir) \
-	-I$(top_srcdir)/exynos \
 	$(PTHREADSTUBS_CFLAGS) \
 	-I$(top_srcdir)/include/drm
 
@@ -24,3 +22,6 @@ libdrm_exynosinclude_HEADERS = exynos_drmif.h
 
 pkgconfigdir = @pkgconfigdir@
 pkgconfig_DATA = libdrm_exynos.pc
+
+TESTS = exynos-symbol-check
+EXTRA_DIST = $(TESTS)

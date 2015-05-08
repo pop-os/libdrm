@@ -62,7 +62,7 @@
 #endif
 
 #include "xf86drm.h"
-#include "libdrm.h"
+#include "libdrm_macros.h"
 
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
 #define DRM_MAJOR 145
@@ -114,11 +114,6 @@ drmDebugPrint(const char *format, va_list ap)
     return vfprintf(stderr, format, ap);
 }
 
-typedef int DRM_PRINTFLIKE(1, 0) (*debug_msg_func_t)(const char *format,
-						     va_list ap);
-
-static debug_msg_func_t drm_debug_print = drmDebugPrint;
-
 void
 drmMsg(const char *format, ...)
 {
@@ -130,16 +125,10 @@ drmMsg(const char *format, ...)
 	if (drm_server_info) {
 	  drm_server_info->debug_print(format,ap);
 	} else {
-	  drm_debug_print(format, ap);
+	  drmDebugPrint(format, ap);
 	}
 	va_end(ap);
     }
-}
-
-void
-drmSetDebugMsgFunction(debug_msg_func_t debug_msg_ptr)
-{
-    drm_debug_print = debug_msg_ptr;
 }
 
 static void *drmHashTable = NULL; /* Context switch callbacks */
@@ -277,6 +266,7 @@ static int drmMatchBusID(const char *id1, const char *id2, int pci_domain_ok)
  * If any other failure happened then it will output error mesage using
  * drmMsg() call.
  */
+#if !defined(UDEV)
 static int chown_check_return(const char *path, uid_t owner, gid_t group)
 {
 	int rv;
@@ -292,6 +282,7 @@ static int chown_check_return(const char *path, uid_t owner, gid_t group)
 			path, errno, strerror(errno));
 	return -1;
 }
+#endif
 
 /**
  * Open the DRM device, creating it if necessary.
@@ -1728,7 +1719,7 @@ int drmAgpEnable(int fd, unsigned long mode)
 {
     drm_agp_mode_t m;
 
-    memclear(mode);
+    memclear(m);
     m.mode = mode;
     if (drmIoctl(fd, DRM_IOCTL_AGP_ENABLE, &m))
 	return -errno;

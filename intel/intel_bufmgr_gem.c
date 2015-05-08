@@ -56,7 +56,7 @@
 #ifndef ETIME
 #define ETIME ETIMEDOUT
 #endif
-#include "libdrm.h"
+#include "libdrm_macros.h"
 #include "libdrm_lists.h"
 #include "intel_bufmgr.h"
 #include "intel_bufmgr_priv.h"
@@ -131,6 +131,11 @@ typedef struct _drm_intel_bufmgr_gem {
 	unsigned int no_exec : 1;
 	unsigned int has_vebox : 1;
 	bool fenced_relocs;
+
+	struct {
+		void *ptr;
+		uint32_t handle;
+	} userptr_active;
 
 	char *aub_filename;
 	FILE *aub_file;
@@ -936,13 +941,77 @@ drm_intel_gem_bo_alloc_userptr(drm_intel_bufmgr *bufmgr,
 	return &bo_gem->bo;
 }
 
+static bool
+has_userptr(drm_intel_bufmgr_gem *bufmgr_gem)
+{
+	int ret;
+	void *ptr;
+	long pgsz;
+	struct drm_i915_gem_userptr userptr;
+
+	pgsz = sysconf(_SC_PAGESIZE);
+	assert(pgsz > 0);
+
+	ret = posix_memalign(&ptr, pgsz, pgsz);
+	if (ret) {
+		DBG("Failed to get a page (%ld) for userptr detection!\n",
+			pgsz);
+		return false;
+	}
+
+	memclear(userptr);
+	userptr.user_ptr = (__u64)(unsigned long)ptr;
+	userptr.user_size = pgsz;
+
+retry:
+	ret = drmIoctl(bufmgr_gem->fd, DRM_IOCTL_I915_GEM_USERPTR, &userptr);
+	if (ret) {
+		if (errno == ENODEV && userptr.flags == 0) {
+			userptr.flags = I915_USERPTR_UNSYNCHRONIZED;
+			goto retry;
+		}
+		free(ptr);
+		return false;
+	}
+
+	/* We don't release the userptr bo here as we want to keep the
+	 * kernel mm tracking alive for our lifetime. The first time we
+	 * create a userptr object the kernel has to install a mmu_notifer
+	 * which is a heavyweight operation (e.g. it requires taking all
+	 * mm_locks and stop_machine()).
+	 */
+
+	bufmgr_gem->userptr_active.ptr = ptr;
+	bufmgr_gem->userptr_active.handle = userptr.handle;
+
+	return true;
+}
+
+static drm_intel_bo *
+check_bo_alloc_userptr(drm_intel_bufmgr *bufmgr,
+		       const char *name,
+		       void *addr,
+		       uint32_t tiling_mode,
+		       uint32_t stride,
+		       unsigned long size,
+		       unsigned long flags)
+{
+	if (has_userptr((drm_intel_bufmgr_gem *)bufmgr))
+		bufmgr->bo_alloc_userptr = drm_intel_gem_bo_alloc_userptr;
+	else
+		bufmgr->bo_alloc_userptr = NULL;
+
+	return drm_intel_bo_alloc_userptr(bufmgr, name, addr,
+					  tiling_mode, stride, size, flags);
+}
+
 /**
  * Returns a drm_intel_bo wrapping the given buffer object handle.
  *
  * This can be used when one application needs to pass a buffer object
  * to another.
  */
-drm_public drm_intel_bo *
+drm_intel_bo *
 drm_intel_bo_gem_create_from_name(drm_intel_bufmgr *bufmgr,
 				  const char *name,
 				  unsigned int handle)
@@ -1404,7 +1473,7 @@ map_gtt(drm_intel_bo *bo)
 	return 0;
 }
 
-drm_public int
+int
 drm_intel_gem_bo_map_gtt(drm_intel_bo *bo)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *) bo->bufmgr;
@@ -1463,7 +1532,7 @@ drm_intel_gem_bo_map_gtt(drm_intel_bo *bo)
  * undefined).
  */
 
-drm_public int
+int
 drm_intel_gem_bo_map_unsynchronized(drm_intel_bo *bo)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *) bo->bufmgr;
@@ -1552,7 +1621,7 @@ static int drm_intel_gem_bo_unmap(drm_intel_bo *bo)
 	return ret;
 }
 
-drm_public int
+int
 drm_intel_gem_bo_unmap_gtt(drm_intel_bo *bo)
 {
 	return drm_intel_gem_bo_unmap(bo);
@@ -1677,7 +1746,7 @@ drm_intel_gem_bo_wait_rendering(drm_intel_bo *bo)
  * Note that some kernels have broken the inifite wait for negative values
  * promise, upgrade to latest stable kernels if this is the case.
  */
-drm_public int
+int
 drm_intel_gem_bo_wait(drm_intel_bo *bo, int64_t timeout_ns)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *) bo->bufmgr;
@@ -1713,7 +1782,7 @@ drm_intel_gem_bo_wait(drm_intel_bo *bo, int64_t timeout_ns)
  * In combination with drm_intel_gem_bo_pin() and manual fence management, we
  * can do tiled pixmaps this way.
  */
-drm_public void
+void
 drm_intel_gem_bo_start_gtt_access(drm_intel_bo *bo, int write_enable)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *) bo->bufmgr;
@@ -1740,7 +1809,8 @@ static void
 drm_intel_bufmgr_gem_destroy(drm_intel_bufmgr *bufmgr)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *) bufmgr;
-	int i;
+	struct drm_gem_close close_bo;
+	int i, ret;
 
 	free(bufmgr_gem->exec2_objects);
 	free(bufmgr_gem->exec_objects);
@@ -1762,6 +1832,18 @@ drm_intel_bufmgr_gem_destroy(drm_intel_bufmgr *bufmgr)
 
 			drm_intel_gem_bo_free(&bo_gem->bo);
 		}
+	}
+
+	/* Release userptr bo kept hanging around for optimisation. */
+	if (bufmgr_gem->userptr_active.ptr) {
+		memclear(close_bo);
+		close_bo.handle = bufmgr_gem->userptr_active.handle;
+		ret = drmIoctl(bufmgr_gem->fd, DRM_IOCTL_GEM_CLOSE, &close_bo);
+		free(bufmgr_gem->userptr_active.ptr);
+		if (ret)
+			fprintf(stderr,
+				"Failed to release test userptr object! (%d) "
+				"i915 kernel driver may not be sane!\n", errno);
 	}
 
 	free(bufmgr);
@@ -1876,7 +1958,7 @@ drm_intel_gem_bo_emit_reloc_fence(drm_intel_bo *bo, uint32_t offset,
 				read_domains, write_domain, true);
 }
 
-drm_public int
+int
 drm_intel_gem_bo_get_reloc_count(drm_intel_bo *bo)
 {
 	drm_intel_bo_gem *bo_gem = (drm_intel_bo_gem *) bo;
@@ -1897,7 +1979,7 @@ drm_intel_gem_bo_get_reloc_count(drm_intel_bo *bo)
  * Any further drm_intel_bufmgr_check_aperture_space() queries
  * involving this buffer in the tree are undefined after this call.
  */
-drm_public void
+void
 drm_intel_gem_bo_clear_relocs(drm_intel_bo *bo, int start)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *) bo->bufmgr;
@@ -2233,7 +2315,7 @@ aub_build_dump_ringbuffer(drm_intel_bufmgr_gem *bufmgr_gem,
 	bufmgr_gem->aub_offset += 4096;
 }
 
-drm_public void
+void
 drm_intel_gem_bo_aub_dump_bmp(drm_intel_bo *bo,
 			      int x1, int y1, int width, int height,
 			      enum aub_dump_bmp_format format,
@@ -2504,7 +2586,7 @@ drm_intel_gem_bo_mrb_exec2(drm_intel_bo *bo, int used,
 			flags);
 }
 
-drm_public int
+int
 drm_intel_gem_bo_context_exec(drm_intel_bo *bo, drm_intel_context *ctx,
 			      int used, unsigned int flags)
 {
@@ -2629,7 +2711,7 @@ drm_intel_gem_bo_get_tiling(drm_intel_bo *bo, uint32_t * tiling_mode,
 	return 0;
 }
 
-drm_public drm_intel_bo *
+drm_intel_bo *
 drm_intel_bo_gem_create_from_prime(drm_intel_bufmgr *bufmgr, int prime_fd, int size)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *) bufmgr;
@@ -2715,7 +2797,7 @@ drm_intel_bo_gem_create_from_prime(drm_intel_bufmgr *bufmgr, int prime_fd, int s
 	return &bo_gem->bo;
 }
 
-drm_public int
+int
 drm_intel_bo_gem_export_to_prime(drm_intel_bo *bo, int *prime_fd)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *) bo->bufmgr;
@@ -2775,7 +2857,7 @@ drm_intel_gem_bo_flink(drm_intel_bo *bo, uint32_t * name)
  * size is only bounded by how many buffers of that size we've managed to have
  * in flight at once.
  */
-drm_public void
+void
 drm_intel_bufmgr_gem_enable_reuse(drm_intel_bufmgr *bufmgr)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *) bufmgr;
@@ -2790,7 +2872,7 @@ drm_intel_bufmgr_gem_enable_reuse(drm_intel_bufmgr *bufmgr)
  * allocation.  If this option is not enabled, all relocs will have fence
  * register allocated.
  */
-drm_public void
+void
 drm_intel_bufmgr_gem_enable_fenced_relocs(drm_intel_bufmgr *bufmgr)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *)bufmgr;
@@ -3062,7 +3144,7 @@ init_cache_buckets(drm_intel_bufmgr_gem *bufmgr_gem)
 	}
 }
 
-drm_public void
+void
 drm_intel_bufmgr_gem_set_vma_cache_size(drm_intel_bufmgr *bufmgr, int limit)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *)bufmgr;
@@ -3103,7 +3185,7 @@ get_pci_device_id(drm_intel_bufmgr_gem *bufmgr_gem)
 	return devid;
 }
 
-drm_public int
+int
 drm_intel_bufmgr_gem_get_devid(drm_intel_bufmgr *bufmgr)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *)bufmgr;
@@ -3117,7 +3199,7 @@ drm_intel_bufmgr_gem_get_devid(drm_intel_bufmgr *bufmgr)
  * This function has to be called before drm_intel_bufmgr_gem_set_aub_dump()
  * for it to have any effect.
  */
-drm_public void
+void
 drm_intel_bufmgr_gem_set_aub_filename(drm_intel_bufmgr *bufmgr,
 				      const char *filename)
 {
@@ -3136,7 +3218,7 @@ drm_intel_bufmgr_gem_set_aub_filename(drm_intel_bufmgr *bufmgr,
  * You can set up a GTT and upload your objects into the referenced
  * space, then send off batchbuffers and get BMPs out the other end.
  */
-drm_public void
+void
 drm_intel_bufmgr_gem_set_aub_dump(drm_intel_bufmgr *bufmgr, int enable)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *)bufmgr;
@@ -3193,7 +3275,7 @@ drm_intel_bufmgr_gem_set_aub_dump(drm_intel_bufmgr *bufmgr, int enable)
 	}
 }
 
-drm_public drm_intel_context *
+drm_intel_context *
 drm_intel_gem_context_create(drm_intel_bufmgr *bufmgr)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem = (drm_intel_bufmgr_gem *)bufmgr;
@@ -3220,7 +3302,7 @@ drm_intel_gem_context_create(drm_intel_bufmgr *bufmgr)
 	return context;
 }
 
-drm_public void
+void
 drm_intel_gem_context_destroy(drm_intel_context *ctx)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem;
@@ -3243,7 +3325,7 @@ drm_intel_gem_context_destroy(drm_intel_context *ctx)
 	free(ctx);
 }
 
-drm_public int
+int
 drm_intel_get_reset_stats(drm_intel_context *ctx,
 			  uint32_t *reset_count,
 			  uint32_t *active,
@@ -3277,7 +3359,7 @@ drm_intel_get_reset_stats(drm_intel_context *ctx,
 	return ret;
 }
 
-drm_public int
+int
 drm_intel_reg_read(drm_intel_bufmgr *bufmgr,
 		   uint32_t offset,
 		   uint64_t *result)
@@ -3295,7 +3377,7 @@ drm_intel_reg_read(drm_intel_bufmgr *bufmgr,
 	return ret;
 }
 
-drm_public int
+int
 drm_intel_get_subslice_total(int fd, unsigned int *subslice_total)
 {
 	drm_i915_getparam_t gp;
@@ -3311,7 +3393,7 @@ drm_intel_get_subslice_total(int fd, unsigned int *subslice_total)
 	return 0;
 }
 
-drm_public int
+int
 drm_intel_get_eu_total(int fd, unsigned int *eu_total)
 {
 	drm_i915_getparam_t gp;
@@ -3348,7 +3430,7 @@ drm_intel_get_eu_total(int fd, unsigned int *eu_total)
  * default state (no annotations), call this function with a \c count
  * of zero.
  */
-drm_public void
+void
 drm_intel_bufmgr_gem_set_aub_annotations(drm_intel_bo *bo,
 					 drm_intel_aub_annotation *annotations,
 					 unsigned count)
@@ -3403,60 +3485,13 @@ drm_intel_bufmgr_gem_unref(drm_intel_bufmgr *bufmgr)
 	}
 }
 
-static bool
-has_userptr(drm_intel_bufmgr_gem *bufmgr_gem)
-{
-	int ret;
-	void *ptr;
-	long pgsz;
-	struct drm_i915_gem_userptr userptr;
-	struct drm_gem_close close_bo;
-
-	pgsz = sysconf(_SC_PAGESIZE);
-	assert(pgsz > 0);
-
-	ret = posix_memalign(&ptr, pgsz, pgsz);
-	if (ret) {
-		DBG("Failed to get a page (%ld) for userptr detection!\n",
-			pgsz);
-		return false;
-	}
-
-	memclear(userptr);
-	userptr.user_ptr = (__u64)(unsigned long)ptr;
-	userptr.user_size = pgsz;
-
-retry:
-	ret = drmIoctl(bufmgr_gem->fd, DRM_IOCTL_I915_GEM_USERPTR, &userptr);
-	if (ret) {
-		if (errno == ENODEV && userptr.flags == 0) {
-			userptr.flags = I915_USERPTR_UNSYNCHRONIZED;
-			goto retry;
-		}
-		free(ptr);
-		return false;
-	}
-
-	memclear(close_bo);
-	close_bo.handle = userptr.handle;
-	ret = drmIoctl(bufmgr_gem->fd, DRM_IOCTL_GEM_CLOSE, &close_bo);
-	free(ptr);
-	if (ret) {
-		fprintf(stderr, "Failed to release test userptr object! (%d) "
-				"i915 kernel driver may not be sane!\n", errno);
-		return false;
-	}
-
-	return true;
-}
-
 /**
  * Initializes the GEM buffer manager, which uses the kernel to allocate, map,
  * and manage map buffer objections.
  *
  * \param fd File descriptor of the opened DRM device.
  */
-drm_public drm_intel_bufmgr *
+drm_intel_bufmgr *
 drm_intel_bufmgr_gem_init(int fd, int batch_size)
 {
 	drm_intel_bufmgr_gem *bufmgr_gem;
@@ -3554,9 +3589,7 @@ drm_intel_bufmgr_gem_init(int fd, int batch_size)
 	ret = drmIoctl(bufmgr_gem->fd, DRM_IOCTL_I915_GETPARAM, &gp);
 	bufmgr_gem->has_relaxed_fencing = ret == 0;
 
-	if (has_userptr(bufmgr_gem))
-		bufmgr_gem->bufmgr.bo_alloc_userptr =
-			drm_intel_gem_bo_alloc_userptr;
+	bufmgr_gem->bufmgr.bo_alloc_userptr = check_bo_alloc_userptr;
 
 	gp.param = I915_PARAM_HAS_WAIT_TIMEOUT;
 	ret = drmIoctl(bufmgr_gem->fd, DRM_IOCTL_I915_GETPARAM, &gp);

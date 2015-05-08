@@ -20,7 +20,7 @@
 
 AC_PREREQ([2.63])
 AC_INIT([libdrm],
-        [2.4.60],
+        [2.4.61],
         [https://bugs.freedesktop.org/enter_bug.cgi?product=DRI],
         [libdrm])
 
@@ -29,6 +29,13 @@ AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])
 
+# Require xorg-macros minimum of 1.12 for XORG_WITH_XSLTPROC
+m4_ifndef([XORG_MACROS_VERSION],
+          [m4_fatal([must install xorg-macros 1.12 or later before running autoconf/autogen])])
+XORG_MACROS_VERSION(1.12)
+XORG_WITH_XSLTPROC
+XORG_MANPAGE_SECTIONS
+
 AM_INIT_AUTOMAKE([1.10 foreign dist-bzip2])
 
 # Enable quiet compiles on automake 1.11.
@@ -36,6 +43,11 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 # Check for programs
 AC_PROG_CC
+AC_PROG_CC_C99
+
+if test "x$ac_cv_prog_cc_c99" = xno; then
+	AC_MSG_ERROR([Building libdrm requires C99 enabled compiler])
+fi
 
 AC_USE_SYSTEM_EXTENSIONS
 AC_SYS_LARGEFILE
@@ -373,9 +385,8 @@ AM_CONDITIONAL(HAVE_LIBUDEV, [test "x$HAVE_LIBUDEV" = xyes])
 
 # xsltproc for docbook manpages
 AC_ARG_ENABLE([manpages],
-              AS_HELP_STRING([--disable-manpages], [disable manpages @<:@default=enabled@:>@]),
+              AS_HELP_STRING([--enable-manpages], [enable manpages @<:@default=auto@:>@]),
               [MANS=$enableval], [MANS=auto])
-AC_PATH_PROG(XSLTPROC, xsltproc)
 AM_CONDITIONAL([BUILD_MANPAGES], [test "x$XSLTPROC" != "x" -a "x$MANS" != "xno"])
 
 # check for offline man-pages stylesheet
@@ -403,24 +414,13 @@ AC_ARG_WITH([kernel-source],
 	    [kernel_source="$with_kernel_source"])
 AC_SUBST(kernel_source)
 
-dnl Add flags for gcc and g++
-if test "x$GCC" = xyes; then
-    # Enable -fvisibility=hidden if using a gcc that supports it
-    save_CFLAGS="$CFLAGS"
-    AC_MSG_CHECKING([whether $CC supports -fvisibility=hidden])
-    VISIBILITY_CFLAGS="-fvisibility=hidden"
-    CFLAGS="$CFLAGS $VISIBILITY_CFLAGS"
-    AC_LINK_IFELSE([AC_LANG_PROGRAM()], AC_MSG_RESULT([yes]),
-                   [VISIBILITY_CFLAGS=""; AC_MSG_RESULT([no])]);
+AC_MSG_CHECKING([whether $CC supports __attribute__(("hidden"))])
+AC_LINK_IFELSE([AC_LANG_PROGRAM([
+    int foo_hidden( void ) __attribute__((visibility("hidden")));
+])], HAVE_ATTRIBUTE_VISIBILITY="yes"; AC_MSG_RESULT([yes]), AC_MSG_RESULT([no]));
 
-    # Restore CFLAGS; VISIBILITY_CFLAGS are added to it where needed.
-    CFLAGS=$save_CFLAGS
-
-    if test "x$VISIBILITY_CFLAGS" != x; then
-        AC_DEFINE(HAVE_VISIBILITY, 1, [Compiler has -fvisibility support])
-    fi
-
-    AC_SUBST([VISIBILITY_CFLAGS])
+if test "x$HAVE_ATTRIBUTE_VISIBILITY" = xyes; then
+    AC_DEFINE(HAVE_VISIBILITY, 1, [Compiler supports __attribute__(("hidden"))])
 fi
 
 AC_SUBST(WARN_CFLAGS)
