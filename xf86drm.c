@@ -140,16 +140,12 @@ void *drmGetHashTable(void)
 
 void *drmMalloc(int size)
 {
-    void *pt;
-    if ((pt = malloc(size)))
-	memset(pt, 0, size);
-    return pt;
+    return calloc(1, size);
 }
 
 void drmFree(void *pt)
 {
-    if (pt)
-	free(pt);
+    free(pt);
 }
 
 /**
@@ -352,7 +348,7 @@ static int drmOpenDevice(dev_t dev, int minor, int type)
     }
 
     if (drm_server_info) {
-	group = (serv_group >= 0) ? serv_group : DRM_DEV_GID;
+	group = ((int)serv_group >= 0) ? serv_group : DRM_DEV_GID;
 	chown_check_return(buf, user, group);
 	chmod(buf, devmode);
     }
@@ -2724,6 +2720,8 @@ int drmPrimeHandleToFD(int fd, uint32_t handle, uint32_t flags, int *prime_fd)
 	struct drm_prime_handle args;
 	int ret;
 
+	memclear(args);
+	args.fd = -1;
 	args.handle = handle;
 	args.flags = flags;
 	ret = drmIoctl(fd, DRM_IOCTL_PRIME_HANDLE_TO_FD, &args);
@@ -2739,8 +2737,8 @@ int drmPrimeFDToHandle(int fd, int prime_fd, uint32_t *handle)
 	struct drm_prime_handle args;
 	int ret;
 
+	memclear(args);
 	args.fd = prime_fd;
-	args.flags = 0;
 	ret = drmIoctl(fd, DRM_IOCTL_PRIME_FD_TO_HANDLE, &args);
 	if (ret)
 		return ret;

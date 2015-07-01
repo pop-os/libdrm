@@ -561,11 +561,9 @@ static struct resources *get_resources(struct device *dev)
 	struct resources *res;
 	int i;
 
-	res = malloc(sizeof *res);
+	res = calloc(1, sizeof(*res));
 	if (res == 0)
 		return NULL;
-
-	memset(res, 0, sizeof *res);
 
 	drmSetClientCap(dev->fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1);
 
@@ -576,18 +574,13 @@ static struct resources *get_resources(struct device *dev)
 		goto error;
 	}
 
-	res->crtcs = malloc(res->res->count_crtcs * sizeof *res->crtcs);
-	res->encoders = malloc(res->res->count_encoders * sizeof *res->encoders);
-	res->connectors = malloc(res->res->count_connectors * sizeof *res->connectors);
-	res->fbs = malloc(res->res->count_fbs * sizeof *res->fbs);
+	res->crtcs = calloc(res->res->count_crtcs, sizeof(*res->crtcs));
+	res->encoders = calloc(res->res->count_encoders, sizeof(*res->encoders));
+	res->connectors = calloc(res->res->count_connectors, sizeof(*res->connectors));
+	res->fbs = calloc(res->res->count_fbs, sizeof(*res->fbs));
 
 	if (!res->crtcs || !res->encoders || !res->connectors || !res->fbs)
 		goto error;
-
-	memset(res->crtcs , 0, res->res->count_crtcs * sizeof *res->crtcs);
-	memset(res->encoders, 0, res->res->count_encoders * sizeof *res->encoders);
-	memset(res->connectors, 0, res->res->count_connectors * sizeof *res->connectors);
-	memset(res->fbs, 0, res->res->count_fbs * sizeof *res->fbs);
 
 #define get_resource(_res, __res, type, Type)					\
 	do {									\
@@ -623,8 +616,8 @@ static struct resources *get_resources(struct device *dev)
 					strerror(errno));			\
 				continue;					\
 			}							\
-			obj->props_info = malloc(obj->props->count_props *	\
-						 sizeof *obj->props_info);	\
+			obj->props_info = calloc(obj->props->count_props,	\
+						 sizeof(*obj->props_info));	\
 			if (!obj->props_info)					\
 				continue;					\
 			for (j = 0; j < obj->props->count_props; ++j)		\
@@ -646,11 +639,9 @@ static struct resources *get_resources(struct device *dev)
 		return res;
 	}
 
-	res->planes = malloc(res->plane_res->count_planes * sizeof *res->planes);
+	res->planes = calloc(res->plane_res->count_planes, sizeof(*res->planes));
 	if (!res->planes)
 		goto error;
-
-	memset(res->planes, 0, res->plane_res->count_planes * sizeof *res->planes);
 
 	get_resource(res, plane_res, plane, Plane);
 	get_properties(res, plane_res, plane, PLANE);
@@ -969,6 +960,18 @@ page_flip_handler(int fd, unsigned int frame,
 	}
 }
 
+static bool format_support(const drmModePlanePtr ovr, uint32_t fmt)
+{
+	unsigned int i;
+
+	for (i = 0; i < ovr->count_formats; ++i) {
+		if (ovr->formats[i] == fmt)
+			return true;
+	}
+
+	return false;
+}
+
 static int set_plane(struct device *dev, struct plane_arg *p)
 {
 	drmModePlane *ovr;
@@ -999,7 +1002,7 @@ static int set_plane(struct device *dev, struct plane_arg *p)
 
 	for (i = 0; i < dev->resources->plane_res->count_planes && !plane_id; i++) {
 		ovr = dev->resources->planes[i].plane;
-		if (!ovr)
+		if (!ovr || !format_support(ovr, p->fourcc))
 			continue;
 
 		if ((ovr->possible_crtcs & (1 << pipe)) && !ovr->crtc_id)
@@ -1313,7 +1316,7 @@ static int parse_connector(struct pipe_arg *pipe, const char *arg)
 			pipe->num_cons++;
 	}
 
-	pipe->con_ids = malloc(pipe->num_cons * sizeof *pipe->con_ids);
+	pipe->con_ids = calloc(pipe->num_cons, sizeof(*pipe->con_ids));
 	if (pipe->con_ids == NULL)
 		return -1;
 
@@ -1367,8 +1370,6 @@ static int parse_connector(struct pipe_arg *pipe, const char *arg)
 static int parse_plane(struct plane_arg *plane, const char *p)
 {
 	char *end;
-
-	memset(plane, 0, sizeof *plane);
 
 	plane->crtc_id = strtoul(p, &end, 10);
 	if (*end != ':')
@@ -1494,7 +1495,7 @@ int main(int argc, char **argv)
 	int drop_master = 0;
 	int test_vsync = 0;
 	int test_cursor = 0;
-	const char *modules[] = { "i915", "radeon", "nouveau", "vmwgfx", "omapdrm", "exynos", "tilcdc", "msm", "sti", "tegra", "imx-drm", "rockchip" };
+	const char *modules[] = { "i915", "radeon", "nouveau", "vmwgfx", "omapdrm", "exynos", "tilcdc", "msm", "sti", "tegra", "imx-drm", "rockchip", "atmel-hlcdc" };
 	char *device = NULL;
 	char *module = NULL;
 	unsigned int i;
@@ -1541,11 +1542,11 @@ int main(int argc, char **argv)
 				fprintf(stderr, "memory allocation failed\n");
 				return 1;
 			}
+			memset(&plane_args[plane_count], 0, sizeof(*plane_args));
 
 			if (parse_plane(&plane_args[plane_count], optarg) < 0)
 				usage(argv[0]);
 
-			plane_args[plane_count].fb_id = 0;
 			plane_count++;
 			break;
 		case 'p':
@@ -1559,6 +1560,7 @@ int main(int argc, char **argv)
 				fprintf(stderr, "memory allocation failed\n");
 				return 1;
 			}
+			memset(&pipe_args[count], 0, sizeof(*pipe_args));
 
 			if (parse_connector(&pipe_args[count], optarg) < 0)
 				usage(argv[0]);
@@ -1578,6 +1580,7 @@ int main(int argc, char **argv)
 				fprintf(stderr, "memory allocation failed\n");
 				return 1;
 			}
+			memset(&prop_args[prop_count], 0, sizeof(*prop_args));
 
 			if (parse_property(&prop_args[prop_count], optarg) < 0)
 				usage(argv[0]);

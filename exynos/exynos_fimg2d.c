@@ -254,8 +254,7 @@ struct g2d_context *g2d_init(int fd)
 
 void g2d_fini(struct g2d_context *ctx)
 {
-	if (ctx)
-		free(ctx);
+	free(ctx);
 }
 
 /**
@@ -330,9 +329,7 @@ g2d_solid_fill(struct g2d_context *ctx, struct g2d_image *img,
 	bitblt.data.fast_solid_color_fill_en = 1;
 	g2d_add_cmd(ctx, BITBLT_COMMAND_REG, bitblt.val);
 
-	g2d_flush(ctx);
-
-	return 0;
+	return g2d_flush(ctx);
 }
 
 /**
@@ -415,9 +412,7 @@ g2d_copy(struct g2d_context *ctx, struct g2d_image *src,
 	rop4.data.unmasked_rop3 = G2D_ROP3_SRC;
 	g2d_add_cmd(ctx, ROP4_REG, rop4.val);
 
-	g2d_flush(ctx);
-
-	return 0;
+	return g2d_flush(ctx);
 }
 
 /**
@@ -527,9 +522,7 @@ g2d_copy_with_scale(struct g2d_context *ctx, struct g2d_image *src,
 	pt.data.y = dst_y + dst_h;
 	g2d_add_cmd(ctx, DST_RIGHT_BOTTOM_REG, pt.val);
 
-	g2d_flush(ctx);
-
-	return 0;
+	return g2d_flush(ctx);
 }
 
 /**
@@ -636,9 +629,7 @@ g2d_blend(struct g2d_context *ctx, struct g2d_image *src,
 	pt.data.y = dst_y + h;
 	g2d_add_cmd(ctx, DST_RIGHT_BOTTOM_REG, pt.val);
 
-	g2d_flush(ctx);
-
-	return 0;
+	return g2d_flush(ctx);
 }
 
 /**
@@ -766,7 +757,5 @@ g2d_scale_and_blend(struct g2d_context *ctx, struct g2d_image *src,
 	pt.data.y = dst_y + dst_h;
 	g2d_add_cmd(ctx, DST_RIGHT_BOTTOM_REG, pt.val);
 
-	g2d_flush(ctx);
-
-	return 0;
+	return g2d_flush(ctx);
 }

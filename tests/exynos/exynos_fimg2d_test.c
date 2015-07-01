@@ -34,48 +34,15 @@
 #include "exynos_fimg2d.h"
 
 #define DRM_MODULE_NAME		"exynos"
-#define MAX_TEST_CASE		8
 
 static unsigned int screen_width, screen_height;
-
-/*
- * A structure to test fimg2d hw.
- *
- * @solid_fill: fill given color data to source buffer.
- * @copy: copy source to destination buffer.
- * @copy_with_scale: copy source to destination buffer scaling up or
- *	down properly.
- * @blend: blend source to destination buffer.
- */
-struct fimg2d_test_case {
-	int (*solid_fill)(struct exynos_device *dev, struct exynos_bo *dst);
-	int (*copy)(struct exynos_device *dev, struct exynos_bo *src,
-			struct exynos_bo *dst, enum e_g2d_buf_type);
-	int (*copy_with_scale)(struct exynos_device *dev,
-				struct exynos_bo *src, struct exynos_bo *dst,
-				enum e_g2d_buf_type);
-	int (*blend)(struct exynos_device *dev,
-				struct exynos_bo *src, struct exynos_bo *dst,
-				enum e_g2d_buf_type);
-	int (*checkerboard)(struct exynos_device *dev,
-				struct exynos_bo *src, struct exynos_bo *dst,
-				enum e_g2d_buf_type);
-};
 
 struct connector {
 	uint32_t id;
 	char mode_str[64];
-	char format_str[5];
-	unsigned int fourcc;
 	drmModeModeInfo *mode;
 	drmModeEncoder *encoder;
 	int crtc;
-	int pipe;
-	int plane_zpos;
-	unsigned int fb_id[2], current_fb_id;
-	struct timeval start;
-
-	int swap_count;
 };
 
 static void connector_find_mode(int fd, struct connector *c,
@@ -145,37 +112,6 @@ static void connector_find_mode(int fd, struct connector *c,
 		c->crtc = c->encoder->crtc_id;
 }
 
-static int connector_find_plane(int fd, unsigned int *plane_id)
-{
-	drmModePlaneRes *plane_resources;
-	drmModePlane *ovr;
-	int i;
-
-	plane_resources = drmModeGetPlaneResources(fd);
-	if (!plane_resources) {
-		fprintf(stderr, "drmModeGetPlaneResources failed: %s\n",
-			strerror(errno));
-		return -1;
-	}
-
-	for (i = 0; i < plane_resources->count_planes; i++) {
-		plane_id[i] = 0;
-
-		ovr = drmModeGetPlane(fd, plane_resources->planes[i]);
-		if (!ovr) {
-			fprintf(stderr, "drmModeGetPlane failed: %s\n",
-				strerror(errno));
-			continue;
-		}
-
-		if (ovr->possible_crtcs & (1 << 0))
-			plane_id[i] = ovr->plane_id;
-		drmModeFreePlane(ovr);
-	}
-
-	return 0;
-}
-
 static int drm_set_crtc(struct exynos_device *dev, struct connector *c,
 			unsigned int fb_id)
 {
@@ -183,14 +119,9 @@ static int drm_set_crtc(struct exynos_device *dev, struct connector *c,
 
 	ret = drmModeSetCrtc(dev->fd, c->crtc,
 			fb_id, 0, 0, &c->id, 1, c->mode);
-	if (ret) {
+	if (ret)
 		drmMsg("failed to set mode: %s\n", strerror(errno));
-		goto err;
-	}
 
-	return 0;
-
-err:
 	return ret;
 }
 
@@ -339,9 +270,10 @@ static int g2d_copy_test(struct exynos_device *dev, struct exynos_bo *src,
 		src_img.user_ptr[0].userptr = userptr;
 		src_img.user_ptr[0].size = size;
 		break;
+	case G2D_IMGBUF_COLOR:
 	default:
-		type = G2D_IMGBUF_GEM;
-		break;
+		ret = -EFAULT;
+		goto fail;
 	}
 
 	printf("copy test with %s.\n",
@@ -375,6 +307,7 @@ err_free_userptr:
 		if (userptr)
 			free((void *)userptr);
 
+fail:
 	g2d_fini(ctx);
 
 	return ret;
@@ -418,9 +351,10 @@ static int g2d_copy_with_scale_test(struct exynos_device *dev,
 		src_img.user_ptr[0].userptr = userptr;
 		src_img.user_ptr[0].size = size;
 		break;
+	case G2D_IMGBUF_COLOR:
 	default:
-		type = G2D_IMGBUF_GEM;
-		break;
+		ret = -EFAULT;
+		goto fail;
 	}
 
 	printf("copy and scale test with %s.\n",
@@ -459,6 +393,7 @@ err_free_userptr:
 		if (userptr)
 			free((void *)userptr);
 
+fail:
 	g2d_fini(ctx);
 
 	return 0;
@@ -504,9 +439,10 @@ static int g2d_blend_test(struct exynos_device *dev,
 		src_img.user_ptr[0].userptr = userptr;
 		src_img.user_ptr[0].size = size;
 		break;
+	case G2D_IMGBUF_COLOR:
 	default:
-		type = G2D_IMGBUF_GEM;
-		break;
+		ret = -EFAULT;
+		goto fail;
 	}
 
 	printf("blend test with %s.\n",
@@ -556,6 +492,7 @@ err_free_userptr:
 		if (userptr)
 			free((void *)userptr);
 
+fail:
 	g2d_fini(ctx);
 
 	return 0;
@@ -601,6 +538,7 @@ static int g2d_checkerboard_test(struct exynos_device *dev,
 		src_img.user_ptr[0].userptr = (unsigned long)checkerboard;
 		src_img.user_ptr[0].size = img_w * img_h * 4;
 		break;
+	case G2D_IMGBUF_COLOR:
 	default:
 		ret = -EFAULT;
 		goto fail;
@@ -638,14 +576,6 @@ fail:
 
 	return ret;
 }
-
-static struct fimg2d_test_case test_case = {
-	.solid_fill = &g2d_solid_fill_test,
-	.copy = &g2d_copy_test,
-	.copy_with_scale = &g2d_copy_with_scale_test,
-	.blend = &g2d_blend_test,
-	.checkerboard = &g2d_checkerboard_test,
-};
 
 static void usage(char *name)
 {
@@ -689,7 +619,7 @@ int main(int argc, char **argv)
 			break;
 		default:
 			usage(argv[0]);
-			return -EINVAL;
+			break;
 		}
 	}
 
@@ -750,15 +680,13 @@ int main(int argc, char **argv)
 	if (ret < 0)
 		goto err_destroy_buffer;
 
-	con.plane_zpos = -1;
-
 	memset(bo->vaddr, 0xff, screen_width * screen_height * 4);
 
 	ret = drm_set_crtc(dev, &con, fb_id);
 	if (ret < 0)
 		goto err_rm_fb;
 
-	ret = test_case.solid_fill(dev, bo);
+	ret = g2d_solid_fill_test(dev, bo);
 	if (ret < 0) {
 		fprintf(stderr, "failed to solid fill operation.\n");
 		goto err_rm_fb;
@@ -772,7 +700,7 @@ int main(int argc, char **argv)
 		goto err_rm_fb;
 	}
 
-	ret = test_case.copy(dev, src, bo, G2D_IMGBUF_GEM);
+	ret = g2d_copy_test(dev, src, bo, G2D_IMGBUF_GEM);
 	if (ret < 0) {
 		fprintf(stderr, "failed to test copy operation.\n");
 		goto err_free_src;
@@ -780,7 +708,7 @@ int main(int argc, char **argv)
 
 	wait_for_user_input(0);
 
-	ret = test_case.copy_with_scale(dev, src, bo, G2D_IMGBUF_GEM);
+	ret = g2d_copy_with_scale_test(dev, src, bo, G2D_IMGBUF_GEM);
 	if (ret < 0) {
 		fprintf(stderr, "failed to test copy and scale operation.\n");
 		goto err_free_src;
@@ -788,7 +716,7 @@ int main(int argc, char **argv)
 
 	wait_for_user_input(0);
 
-	ret = test_case.checkerboard(dev, src, bo, G2D_IMGBUF_GEM);
+	ret = g2d_checkerboard_test(dev, src, bo, G2D_IMGBUF_GEM);
 	if (ret < 0) {
 		fprintf(stderr, "failed to issue checkerboard test.\n");
 		goto err_free_src;
@@ -805,7 +733,7 @@ int main(int argc, char **argv)
 	 * Disable the test for now, until the kernel code has been sanitized.
 	 */
 #if 0
-	ret  = test_case.blend(dev, src, bo, G2D_IMGBUF_USERPTR);
+	ret  = g2d_blend_test(dev, src, bo, G2D_IMGBUF_USERPTR);
 	if (ret < 0)
 		fprintf(stderr, "failed to test blend operation.\n");
 
