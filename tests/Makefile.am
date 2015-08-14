@@ -1,4 +1,4 @@
-SUBDIRS = modeprint proptest modetest
+SUBDIRS = modeprint proptest modetest vbltest
 
 if HAVE_LIBKMS
 SUBDIRS += kmstest
@@ -8,16 +8,18 @@ if HAVE_RADEON
 SUBDIRS += radeon
 endif
 
+if HAVE_AMDGPU
+if HAVE_CUNIT
+SUBDIRS += amdgpu
+endif
+endif
+
 if HAVE_EXYNOS
 SUBDIRS += exynos
 endif
 
 if HAVE_TEGRA
 SUBDIRS += tegra
-endif
-
-if HAVE_LIBUDEV
-SUBDIRS += vbltest
 endif
 
 AM_CFLAGS = \

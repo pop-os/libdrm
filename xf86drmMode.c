@@ -46,6 +46,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
+#ifdef HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -819,8 +822,25 @@ int drmCheckModesettingSupported(const char *busid)
 #elif defined(__DragonFly__)
 	return 0;
 #endif
-	return -ENOSYS;
+#ifdef __OpenBSD__
+	int	fd;
+	struct drm_mode_card_res res;
+	drmModeResPtr r = 0;
 
+	if ((fd = drmOpen(NULL, busid)) < 0)
+		return -EINVAL;
+
+	memset(&res, 0, sizeof(struct drm_mode_card_res));
+
+	if (drmIoctl(fd, DRM_IOCTL_MODE_GETRESOURCES, &res)) {
+		drmClose(fd);
+		return -errno;
+	}
+
+	drmClose(fd);
+	return 0;
+#endif
+	return -ENOSYS;
 }
 
 int drmModeCrtcGetGamma(int fd, uint32_t crtc_id, uint32_t size,
@@ -1286,7 +1306,7 @@ static int sort_req_list(const void *misc, const void *other)
 int drmModeAtomicCommit(int fd, drmModeAtomicReqPtr req, uint32_t flags,
 			void *user_data)
 {
-	drmModeAtomicReqPtr sorted = drmModeAtomicDuplicate(req);
+	drmModeAtomicReqPtr sorted;
 	struct drm_mode_atomic atomic;
 	uint32_t *objs_ptr = NULL;
 	uint32_t *count_props_ptr = NULL;
@@ -1297,7 +1317,11 @@ int drmModeAtomicCommit(int fd, drmModeAtomicReqPtr req, uint32_t flags,
 	int obj_idx = -1;
 	int ret = -1;
 
-	if (!sorted)
+	if (req->cursor == 0)
+		return 0;
+
+	sorted = drmModeAtomicDuplicate(req);
+	if (sorted == NULL)
 		return -ENOMEM;
 
 	memclear(atomic);

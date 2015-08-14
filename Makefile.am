@@ -27,6 +27,7 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-libkms \
 	--enable-intel \
 	--enable-radeon \
+	--enable-amdgpu \
 	--enable-nouveau \
 	--enable-vmwgfx \
 	--enable-omap-experimental-api \
@@ -57,6 +58,10 @@ if HAVE_RADEON
 RADEON_SUBDIR = radeon
 endif
 
+if HAVE_AMDGPU
+AMDGPU_SUBDIR = amdgpu
+endif
+
 if HAVE_OMAP
 OMAP_SUBDIR = omap
 endif
@@ -85,6 +90,7 @@ SUBDIRS = \
 	$(INTEL_SUBDIR) \
 	$(NOUVEAU_SUBDIR) \
 	$(RADEON_SUBDIR) \
+	$(AMDGPU_SUBDIR) \
 	$(OMAP_SUBDIR) \
 	$(EXYNOS_SUBDIR) \
 	$(FREEDRENO_SUBDIR) \

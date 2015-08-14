@@ -20,7 +20,7 @@
 
 AC_PREREQ([2.63])
 AC_INIT([libdrm],
-        [2.4.62],
+        [2.4.63],
         [https://bugs.freedesktop.org/enter_bug.cgi?product=DRI],
         [libdrm])
 
@@ -53,7 +53,7 @@ AC_USE_SYSTEM_EXTENSIONS
 AC_SYS_LARGEFILE
 AC_FUNC_ALLOCA
 
-AC_CHECK_HEADERS([sys/mkdev.h])
+AC_CHECK_HEADERS([sys/mkdev.h sys/sysctl.h])
 
 # Initialize libtool
 LT_PREREQ([2.2])
@@ -85,6 +85,11 @@ AC_ARG_ENABLE(radeon,
 	      AS_HELP_STRING([--disable-radeon],
 	      [Enable support for radeon's KMS API (default: auto)]),
 	      [RADEON=$enableval], [RADEON=auto])
+
+AC_ARG_ENABLE(amdgpu,
+	      AS_HELP_STRING([--disable-amdgpu],
+	      [Enable support for amdgpu's KMS API (default: auto)]),
+	      [AMDGPU=$enableval], [AMDGPU=auto])
 
 AC_ARG_ENABLE(nouveau,
 	      AS_HELP_STRING([--disable-nouveau],
@@ -248,6 +253,9 @@ if test "x$drm_cv_atomic_primitives" = "xnone"; then
 	LIBDRM_ATOMICS_NOT_FOUND_MSG($RADEON, radeon, Radeon, radeon)
 	RADEON=no
 
+	LIBDRM_ATOMICS_NOT_FOUND_MSG($AMDGPU, amdgpu, AMD, amdgpu)
+	AMDGPU=no
+
 	LIBDRM_ATOMICS_NOT_FOUND_MSG($NOUVEAU, nouveau, NVIDIA, nouveau)
 	NOUVEAU=no
 
@@ -268,6 +276,9 @@ else
 	fi
 	if test "x$RADEON" = xauto; then
 		RADEON=yes
+	fi
+	if test "x$AMDGPU" = xauto; then
+		AMDGPU=yes
 	fi
 	if test "x$NOUVEAU" = xauto; then
 		NOUVEAU=yes
@@ -346,6 +357,33 @@ fi
 AM_CONDITIONAL(HAVE_RADEON, [test "x$RADEON" = xyes])
 if test "x$RADEON" = xyes; then
 	AC_DEFINE(HAVE_RADEON, 1, [Have radeon support])
+fi
+
+# Detect cunit library
+PKG_CHECK_MODULES([CUNIT], [cunit >= 2.1], [have_cunit=yes], [have_cunit=no])
+# If pkg-config does not find cunit, check it using AC_CHECK_LIB.  We
+# do this because Debian (Ubuntu) lacks pkg-config file for cunit.
+# fixed in 2.1-2.dfsg-3: http://anonscm.debian.org/cgit/collab-maint/cunit.git/commit/?h=debian
+if test "x${have_cunit}" = "xno"; then
+	AC_CHECK_LIB([cunit], [CU_initialize_registry], [have_cunit=yes], [have_cunit=no])
+	if test "x${have_cunit}" = "xyes"; then
+		CUNIT_LIBS="-lcunit"
+		CUNIT_CFLAGS=""
+		AC_SUBST([CUNIT_LIBS])
+		AC_SUBST([CUNIT_CFLAGS])
+	fi
+fi
+AM_CONDITIONAL(HAVE_CUNIT, [test "x$have_cunit" != "xno"])
+
+AM_CONDITIONAL(HAVE_AMDGPU, [test "x$AMDGPU" = xyes])
+if test "x$AMDGPU" = xyes; then
+	AC_DEFINE(HAVE_AMDGPU, 1, [Have amdgpu support])
+
+	AC_DEFINE(HAVE_CUNIT, [test "x$have_cunit" != "xno"], [Enable CUNIT Have amdgpu support])
+
+	if test "x$have_cunit" = "xno"; then
+		AC_MSG_WARN([Could not find cunit library. Disabling amdgpu tests])
+	fi
 fi
 
 AM_CONDITIONAL(HAVE_TEGRA, [test "x$TEGRA" = xyes])
@@ -446,6 +484,8 @@ AC_CONFIG_FILES([
 	intel/libdrm_intel.pc
 	radeon/Makefile
 	radeon/libdrm_radeon.pc
+	amdgpu/Makefile
+	amdgpu/libdrm_amdgpu.pc
 	nouveau/Makefile
 	nouveau/libdrm_nouveau.pc
 	omap/Makefile
@@ -462,6 +502,7 @@ AC_CONFIG_FILES([
 	tests/kmstest/Makefile
 	tests/proptest/Makefile
 	tests/radeon/Makefile
+	tests/amdgpu/Makefile
 	tests/vbltest/Makefile
 	tests/exynos/Makefile
 	tests/tegra/Makefile
@@ -477,6 +518,7 @@ echo "  libkms         $LIBKMS"
 echo "  Intel API      $INTEL"
 echo "  vmwgfx API     $VMWGFX"
 echo "  Radeon API     $RADEON"
+echo "  AMDGPU API     $AMDGPU"
 echo "  Nouveau API    $NOUVEAU"
 echo "  OMAP API       $OMAP"
 echo "  EXYNOS API     $EXYNOS"
