@@ -33,8 +33,6 @@
 #include "amdgpu_internal.h"
 #include "util_math.h"
 
-static struct amdgpu_bo_va_mgr vamgr = {{0}};
-
 int amdgpu_va_range_query(amdgpu_device_handle dev,
 			  enum amdgpu_gpu_va_range type, uint64_t *start, uint64_t *end)
 {
@@ -46,17 +44,18 @@ int amdgpu_va_range_query(amdgpu_device_handle dev,
 	return -EINVAL;
 }
 
-static void amdgpu_vamgr_init(struct amdgpu_bo_va_mgr *mgr, struct amdgpu_device *dev)
+drm_private void amdgpu_vamgr_init(struct amdgpu_bo_va_mgr *mgr, uint64_t start,
+			      uint64_t max, uint64_t alignment)
 {
-	mgr->va_offset = dev->dev_info.virtual_address_offset;
-	mgr->va_max = dev->dev_info.virtual_address_max;
-	mgr->va_alignment = dev->dev_info.virtual_address_alignment;
+	mgr->va_offset = start;
+	mgr->va_max = max;
+	mgr->va_alignment = alignment;
 
 	list_inithead(&mgr->va_holes);
 	pthread_mutex_init(&mgr->bo_va_mutex, NULL);
 }
 
-static void amdgpu_vamgr_deinit(struct amdgpu_bo_va_mgr *mgr)
+drm_private void amdgpu_vamgr_deinit(struct amdgpu_bo_va_mgr *mgr)
 {
 	struct amdgpu_bo_va_hole *hole;
 	LIST_FOR_EACH_ENTRY(hole, &mgr->va_holes, list) {
@@ -64,26 +63,6 @@ static void amdgpu_vamgr_deinit(struct amdgpu_bo_va_mgr *mgr)
 		free(hole);
 	}
 	pthread_mutex_destroy(&mgr->bo_va_mutex);
-}
-
-drm_private struct amdgpu_bo_va_mgr *
-amdgpu_vamgr_get_global(struct amdgpu_device *dev)
-{
-	int ref;
-	ref = atomic_inc_return(&vamgr.refcount);
-
-	if (ref == 1)
-		amdgpu_vamgr_init(&vamgr, dev);
-	return &vamgr;
-}
-
-drm_private void
-amdgpu_vamgr_reference(struct amdgpu_bo_va_mgr **dst,
-		       struct amdgpu_bo_va_mgr *src)
-{
-	if (update_references(&(*dst)->refcount, NULL))
-		amdgpu_vamgr_deinit(*dst);
-	*dst = src;
 }
 
 drm_private uint64_t
@@ -102,7 +81,7 @@ amdgpu_vamgr_find_va(struct amdgpu_bo_va_mgr *mgr, uint64_t size,
 	pthread_mutex_lock(&mgr->bo_va_mutex);
 	/* TODO: using more appropriate way to track the holes */
 	/* first look for a hole */
-	LIST_FOR_EACH_ENTRY_SAFE(hole, n, &vamgr.va_holes, list) {
+	LIST_FOR_EACH_ENTRY_SAFE(hole, n, &mgr->va_holes, list) {
 		if (base_required) {
 			if(hole->offset > base_required ||
 				(hole->offset + hole->size) < (base_required + size))
@@ -252,23 +231,39 @@ int amdgpu_va_range_alloc(amdgpu_device_handle dev,
 			  amdgpu_va_handle *va_range_handle,
 			  uint64_t flags)
 {
-	va_base_alignment = MAX2(va_base_alignment, dev->vamgr->va_alignment);
-	size = ALIGN(size, vamgr.va_alignment);
+	struct amdgpu_bo_va_mgr *vamgr;
 
-	*va_base_allocated = amdgpu_vamgr_find_va(dev->vamgr, size,
+	if (flags & AMDGPU_VA_RANGE_32_BIT)
+		vamgr = dev->vamgr_32;
+	else
+		vamgr = dev->vamgr;
+
+	va_base_alignment = MAX2(va_base_alignment, vamgr->va_alignment);
+	size = ALIGN(size, vamgr->va_alignment);
+
+	*va_base_allocated = amdgpu_vamgr_find_va(vamgr, size,
 					va_base_alignment, va_base_required);
+
+	if (!(flags & AMDGPU_VA_RANGE_32_BIT) &&
+	    (*va_base_allocated == AMDGPU_INVALID_VA_ADDRESS)) {
+		/* fallback to 32bit address */
+		vamgr = dev->vamgr_32;
+		*va_base_allocated = amdgpu_vamgr_find_va(vamgr, size,
+					va_base_alignment, va_base_required);
+	}
 
 	if (*va_base_allocated != AMDGPU_INVALID_VA_ADDRESS) {
 		struct amdgpu_va* va;
 		va = calloc(1, sizeof(struct amdgpu_va));
 		if(!va){
-			amdgpu_vamgr_free_va(dev->vamgr, *va_base_allocated, size);
+			amdgpu_vamgr_free_va(vamgr, *va_base_allocated, size);
 			return -ENOMEM;
 		}
 		va->dev = dev;
 		va->address = *va_base_allocated;
 		va->size = size;
 		va->range = va_range_type;
+		va->vamgr = vamgr;
 		*va_range_handle = va;
 	} else {
 		return -EINVAL;
@@ -281,7 +276,9 @@ int amdgpu_va_range_free(amdgpu_va_handle va_range_handle)
 {
 	if(!va_range_handle || !va_range_handle->address)
 		return 0;
-	amdgpu_vamgr_free_va(va_range_handle->dev->vamgr, va_range_handle->address,
+
+	amdgpu_vamgr_free_va(va_range_handle->vamgr,
+			va_range_handle->address,
 			va_range_handle->size);
 	free(va_range_handle);
 	return 0;

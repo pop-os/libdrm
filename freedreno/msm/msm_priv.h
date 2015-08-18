@@ -71,8 +71,19 @@ struct msm_bo {
 	struct fd_bo base;
 	uint64_t offset;
 	uint64_t presumed;
-	uint32_t indexp1[FD_PIPE_MAX]; /* index plus 1 */
-	struct list_head list[FD_PIPE_MAX];
+	/* in the common case, a bo won't be referenced by more than a single
+	 * (parent) ring[*].  So to avoid looping over all the bo's in the
+	 * reloc table to find the idx of a bo that might already be in the
+	 * table, we cache the idx in the bo.  But in order to detect the
+	 * slow-path where bo is ref'd in multiple rb's, we also must track
+	 * the current_ring for which the idx is valid.  See bo2idx().
+	 *
+	 * [*] in case multiple ringbuffers, ie. one toplevel and other rb(s)
+	 *     used for IB target(s), the toplevel rb is the parent which is
+	 *     tracking bo's for the submit
+	 */
+	struct fd_ringbuffer *current_ring;
+	uint32_t idx;
 };
 
 static inline struct msm_bo * to_msm_bo(struct fd_bo *x)
@@ -85,13 +96,13 @@ drm_private int msm_bo_new_handle(struct fd_device *dev,
 drm_private struct fd_bo * msm_bo_from_handle(struct fd_device *dev,
 		uint32_t size, uint32_t handle);
 
-static inline void get_abs_timeout(struct drm_msm_timespec *tv, uint32_t ms)
+static inline void get_abs_timeout(struct drm_msm_timespec *tv, uint64_t ns)
 {
 	struct timespec t;
-	uint32_t s = ms / 1000;
+	uint32_t s = ns / 1000000000;
 	clock_gettime(CLOCK_MONOTONIC, &t);
 	tv->tv_sec = t.tv_sec + s;
-	tv->tv_nsec = t.tv_nsec + ((ms - (s * 1000)) * 1000000);
+	tv->tv_nsec = t.tv_nsec + ns - (s * 1000000000);
 }
 
 #endif /* MSM_PRIV_H_ */

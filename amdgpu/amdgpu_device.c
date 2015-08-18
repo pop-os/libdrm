@@ -43,6 +43,7 @@
 #include "amdgpu_drm.h"
 #include "amdgpu_internal.h"
 #include "util_hash_table.h"
+#include "util_math.h"
 
 #define PTR_TO_UINT(x) ((unsigned)((intptr_t)(x)))
 #define UINT_TO_PTR(x) ((void *)((intptr_t)(x)))
@@ -129,7 +130,8 @@ static int amdgpu_get_auth(int fd, int *auth)
 
 static void amdgpu_device_free_internal(amdgpu_device_handle dev)
 {
-	amdgpu_vamgr_reference(&dev->vamgr, NULL);
+	amdgpu_vamgr_deinit(dev->vamgr);
+	free(dev->vamgr);
 	util_hash_table_destroy(dev->bo_flink_names);
 	util_hash_table_destroy(dev->bo_handles);
 	pthread_mutex_destroy(&dev->bo_table_mutex);
@@ -173,6 +175,7 @@ int amdgpu_device_initialize(int fd,
 	int flag_auth = 0;
 	int flag_authexist=0;
 	uint32_t accel_working = 0;
+	uint64_t start, max;
 
 	*device_handle = NULL;
 
@@ -249,7 +252,26 @@ int amdgpu_device_initialize(int fd,
 	if (r)
 		goto cleanup;
 
-	dev->vamgr = amdgpu_vamgr_get_global(dev);
+	dev->vamgr = calloc(1, sizeof(struct amdgpu_bo_va_mgr));
+	if (dev->vamgr == NULL)
+		goto cleanup;
+
+	amdgpu_vamgr_init(dev->vamgr, dev->dev_info.virtual_address_offset,
+			  dev->dev_info.virtual_address_max,
+			  dev->dev_info.virtual_address_alignment);
+
+	max = MIN2(dev->dev_info.virtual_address_max, 0xffffffff);
+	start = amdgpu_vamgr_find_va(dev->vamgr,
+				     max - dev->dev_info.virtual_address_offset,
+				     dev->dev_info.virtual_address_alignment, 0);
+	if (start > 0xffffffff)
+		goto free_va; /* shouldn't get here */
+
+	dev->vamgr_32 =  calloc(1, sizeof(struct amdgpu_bo_va_mgr));
+	if (dev->vamgr_32 == NULL)
+		goto free_va;
+	amdgpu_vamgr_init(dev->vamgr_32, start, max,
+			  dev->dev_info.virtual_address_alignment);
 
 	*major_version = dev->major_version;
 	*minor_version = dev->minor_version;
@@ -258,6 +280,13 @@ int amdgpu_device_initialize(int fd,
 	pthread_mutex_unlock(&fd_mutex);
 
 	return 0;
+
+free_va:
+	r = -ENOMEM;
+	amdgpu_vamgr_free_va(dev->vamgr, start,
+			     max - dev->dev_info.virtual_address_offset);
+	amdgpu_vamgr_deinit(dev->vamgr);
+	free(dev->vamgr);
 
 cleanup:
 	if (dev->fd >= 0)

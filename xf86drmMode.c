@@ -114,7 +114,6 @@ void drmModeFreeResources(drmModeResPtr ptr)
 	drmFree(ptr->connectors);
 	drmFree(ptr->encoders);
 	drmFree(ptr);
-
 }
 
 void drmModeFreeFB(drmModeFBPtr ptr)
@@ -132,7 +131,6 @@ void drmModeFreeCrtc(drmModeCrtcPtr ptr)
 		return;
 
 	drmFree(ptr);
-
 }
 
 void drmModeFreeConnector(drmModeConnectorPtr ptr)
@@ -145,7 +143,6 @@ void drmModeFreeConnector(drmModeConnectorPtr ptr)
 	drmFree(ptr->props);
 	drmFree(ptr->modes);
 	drmFree(ptr);
-
 }
 
 void drmModeFreeEncoder(drmModeEncoderPtr ptr)
@@ -252,7 +249,7 @@ err_allocs:
 }
 
 int drmModeAddFB(int fd, uint32_t width, uint32_t height, uint8_t depth,
-                 uint8_t bpp, uint32_t pitch, uint32_t bo_handle,
+		 uint8_t bpp, uint32_t pitch, uint32_t bo_handle,
 		 uint32_t *buf_id)
 {
 	struct drm_mode_fb_cmd f;
@@ -340,7 +337,6 @@ int drmModeDirtyFB(int fd, uint32_t bufferId,
 	return DRM_IOCTL(fd, DRM_IOCTL_MODE_DIRTYFB, &dirty);
 }
 
-
 /*
  * Crtc functions
  */
@@ -377,9 +373,8 @@ drmModeCrtcPtr drmModeGetCrtc(int fd, uint32_t crtcId)
 	return r;
 }
 
-
 int drmModeSetCrtc(int fd, uint32_t crtcId, uint32_t bufferId,
-                   uint32_t x, uint32_t y, uint32_t *connectors, int count,
+		   uint32_t x, uint32_t y, uint32_t *connectors, int count,
 		   drmModeModeInfoPtr mode)
 {
 	struct drm_mode_crtc crtc;
@@ -609,7 +604,6 @@ int drmModeDetachMode(int fd, uint32_t connector_id, drmModeModeInfoPtr mode_inf
 
 	return DRM_IOCTL(fd, DRM_IOCTL_MODE_DETACHMODE, &res);
 }
-
 
 drmModePropertyPtr drmModeGetProperty(int fd, uint32_t property_id)
 {
@@ -944,7 +938,6 @@ int drmModeSetPlane(int fd, uint32_t plane_id, uint32_t crtc_id,
 		    uint32_t crtc_w, uint32_t crtc_h,
 		    uint32_t src_x, uint32_t src_y,
 		    uint32_t src_w, uint32_t src_h)
-
 {
 	struct drm_mode_set_plane s;
 
@@ -964,7 +957,6 @@ int drmModeSetPlane(int fd, uint32_t plane_id, uint32_t crtc_id,
 
 	return DRM_IOCTL(fd, DRM_IOCTL_MODE_SETPLANE, &s);
 }
-
 
 drmModePlanePtr drmModeGetPlane(int fd, uint32_t plane_id)
 {
