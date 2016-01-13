@@ -20,7 +20,7 @@
 
 AC_PREREQ([2.63])
 AC_INIT([libdrm],
-        [2.4.65],
+        [2.4.66],
         [https://bugs.freedesktop.org/enter_bug.cgi?product=DRI],
         [libdrm])
 
@@ -210,8 +210,8 @@ AC_CACHE_CHECK([for native atomic primitives], drm_cv_atomic_primitives, [
 	drm_cv_atomic_primitives="none"
 
 	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-	int atomic_add(int i) { return __sync_fetch_and_add (&i, 1); }
-	int atomic_cmpxchg(int i, int j, int k) { return __sync_val_compare_and_swap (&i, j, k); }
+	int atomic_add(int *i) { return __sync_add_and_fetch (i, 1); }
+	int atomic_cmpxchg(int *i, int j, int k) { return __sync_val_compare_and_swap (i, j, k); }
 					  ]],[[]])], [drm_cv_atomic_primitives="Intel"],[])
 
 	if test "x$drm_cv_atomic_primitives" = "xnone"; then
@@ -499,6 +499,7 @@ AC_CONFIG_FILES([
 	tests/Makefile
 	tests/modeprint/Makefile
 	tests/modetest/Makefile
+	tests/kms/Makefile
 	tests/kmstest/Makefile
 	tests/proptest/Makefile
 	tests/radeon/Makefile
@@ -507,6 +508,7 @@ AC_CONFIG_FILES([
 	tests/exynos/Makefile
 	tests/tegra/Makefile
 	tests/nouveau/Makefile
+	tests/util/Makefile
 	man/Makefile
 	libdrm.pc])
 AC_OUTPUT
