@@ -139,6 +139,8 @@ static const char * const modules[] = {
 	"imx-drm",
 	"rockchip",
 	"atmel-hlcdc",
+	"fsl-dcu-drm",
+	"vc4",
 };
 
 int util_open(const char *device, const char *module)

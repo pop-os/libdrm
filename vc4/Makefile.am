@@ -1,5 +1,4 @@
-#
-# Copyright © 2011-2012 Intel Corporation
+# Copyright © 2016 Broadcom
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -19,48 +18,17 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#
 
-LOCAL_PATH := $(call my-dir)
-include $(CLEAR_VARS)
+include Makefile.sources
 
-# Import variables LIBDRM_{,H_,INCLUDE_H_,INCLUDE_VMWGFX_H_}FILES
-include $(LOCAL_PATH)/Makefile.sources
+AM_CFLAGS = \
+	$(WARN_CFLAGS) \
+	-I$(top_srcdir) \
+	$(PTHREADSTUBS_CFLAGS) \
+	$(VALGRIND_CFLAGS) \
+	-I$(top_srcdir)/include/drm
 
-#static library for the device (recovery)
-include $(CLEAR_VARS)
-LOCAL_MODULE := libdrm
-LOCAL_MODULE_TAGS := optional
+libdrm_vc4includedir = ${includedir}/libdrm
+libdrm_vc4include_HEADERS = $(LIBDRM_VC4_H_FILES)
 
-LOCAL_SRC_FILES := $(LIBDRM_FILES)
-LOCAL_EXPORT_C_INCLUDE_DIRS := \
-	$(LOCAL_PATH) \
-	$(LOCAL_PATH)/include/drm
-
-LOCAL_C_INCLUDES := \
-	$(LOCAL_PATH)/include/drm
-
-LOCAL_CFLAGS := \
-	-DHAVE_VISIBILITY=1 \
-	-DHAVE_LIBDRM_ATOMIC_PRIMITIVES=1
-include $(BUILD_STATIC_LIBRARY)
-
-# Shared library for the device
-include $(CLEAR_VARS)
-LOCAL_MODULE := libdrm
-LOCAL_MODULE_TAGS := optional
-
-LOCAL_SRC_FILES := $(LIBDRM_FILES)
-LOCAL_EXPORT_C_INCLUDE_DIRS := \
-        $(LOCAL_PATH) \
-        $(LOCAL_PATH)/include/drm
-
-LOCAL_C_INCLUDES := \
-        $(LOCAL_PATH)/include/drm
-
-LOCAL_CFLAGS := \
-        -DHAVE_VISIBILITY=1 \
-        -DHAVE_LIBDRM_ATOMIC_PRIMITIVES=1
-include $(BUILD_SHARED_LIBRARY)
-
-include $(call all-makefiles-under,$(LOCAL_PATH))
+pkgconfig_DATA = libdrm_vc4.pc

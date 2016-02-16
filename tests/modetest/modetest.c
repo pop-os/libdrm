@@ -53,8 +53,11 @@
 #include <string.h>
 #include <strings.h>
 #include <errno.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <sys/time.h>
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 
 #include "xf86drm.h"
 #include "xf86drmMode.h"
@@ -1603,7 +1606,7 @@ int main(int argc, char **argv)
 	if (!args)
 		encoders = connectors = crtcs = planes = framebuffers = 1;
 
-	dev.fd = util_open(module, device);
+	dev.fd = util_open(device, module);
 	if (dev.fd < 0)
 		return -1;
 
