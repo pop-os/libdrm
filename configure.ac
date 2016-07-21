@@ -20,7 +20,7 @@
 
 AC_PREREQ([2.63])
 AC_INIT([libdrm],
-        [2.4.68],
+        [2.4.69],
         [https://bugs.freedesktop.org/enter_bug.cgi?product=DRI],
         [libdrm])
 
@@ -53,7 +53,8 @@ AC_USE_SYSTEM_EXTENSIONS
 AC_SYS_LARGEFILE
 AC_FUNC_ALLOCA
 
-AC_CHECK_HEADERS([sys/mkdev.h sys/sysctl.h sys/select.h])
+AC_HEADER_MAJOR
+AC_CHECK_HEADERS([sys/sysctl.h sys/select.h])
 
 # Initialize libtool
 LT_PREREQ([2.2])
