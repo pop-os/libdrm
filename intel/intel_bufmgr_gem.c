@@ -832,6 +832,10 @@ retry:
 		}
 
 		bo_gem->gem_handle = create.handle;
+		HASH_ADD(handle_hh, bufmgr_gem->handle_table,
+			 gem_handle, sizeof(bo_gem->gem_handle),
+			 bo_gem);
+
 		bo_gem->bo.handle = bo_gem->gem_handle;
 		bo_gem->bo.bufmgr = bufmgr;
 		bo_gem->bo.align = alignment;
@@ -844,10 +848,6 @@ retry:
 							 tiling_mode,
 							 stride))
 			goto err_free;
-
-		HASH_ADD(handle_hh, bufmgr_gem->handle_table,
-			 gem_handle, sizeof(bo_gem->gem_handle),
-			 bo_gem);
 	}
 
 	bo_gem->name = name;
