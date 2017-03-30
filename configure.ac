@@ -20,7 +20,7 @@
 
 AC_PREREQ([2.63])
 AC_INIT([libdrm],
-        [2.4.75],
+        [2.4.76],
         [https://bugs.freedesktop.org/enter_bug.cgi?product=DRI],
         [libdrm])
 
@@ -28,6 +28,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])
+PKG_PROG_PKG_CONFIG
 
 # Require xorg-macros minimum of 1.12 for XORG_WITH_XSLTPROC
 m4_ifndef([XORG_MACROS_VERSION],
