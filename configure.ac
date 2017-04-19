@@ -20,7 +20,7 @@
 
 AC_PREREQ([2.63])
 AC_INIT([libdrm],
-        [2.4.77],
+        [2.4.80],
         [https://bugs.freedesktop.org/enter_bug.cgi?product=DRI],
         [libdrm])
 
@@ -64,7 +64,7 @@ LT_INIT([disable-static])
 dnl pthread-stubs is mandatory on BSD platforms, due to the nature of the
 dnl project. Even then there's a notable issue as described in the project README
 case "$host_os" in
-linux* | cygwin* | darwin* | solaris* | gnu*)
+linux* | cygwin* | darwin* | solaris* | *-gnu* | gnu*)
     pthread_stubs_possible="no"
     ;;
 * )
