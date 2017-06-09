@@ -20,7 +20,7 @@
 
 AC_PREREQ([2.63])
 AC_INIT([libdrm],
-        [2.4.80],
+        [2.4.81],
         [https://bugs.freedesktop.org/enter_bug.cgi?product=DRI],
         [libdrm])
 
@@ -54,7 +54,11 @@ AC_USE_SYSTEM_EXTENSIONS
 AC_SYS_LARGEFILE
 AC_FUNC_ALLOCA
 
+save_CFLAGS="$CFLAGS"
+export CFLAGS="$CFLAGS -Werror"
 AC_HEADER_MAJOR
+CFLAGS="$save_CFLAGS"
+
 AC_CHECK_HEADERS([sys/sysctl.h sys/select.h])
 
 # Initialize libtool
