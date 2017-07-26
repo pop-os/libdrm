@@ -1328,8 +1328,91 @@ int amdgpu_cs_destroy_semaphore(amdgpu_semaphore_handle sem);
 */
 const char *amdgpu_get_marketing_name(amdgpu_device_handle dev);
 
+/**
+ *  Create kernel sync object
+ *
+ * \param   dev	      - \c [in]  device handle
+ * \param   syncobj   - \c [out] sync object handle
+ *
+ * \return   0 on success\n
+ *          <0 - Negative POSIX Error code
+ *
+*/
+int amdgpu_cs_create_syncobj(amdgpu_device_handle dev,
+			     uint32_t *syncobj);
+/**
+ *  Destroy kernel sync object
+ *
+ * \param   dev	    - \c [in] device handle
+ * \param   syncobj - \c [in] sync object handle
+ *
+ * \return   0 on success\n
+ *          <0 - Negative POSIX Error code
+ *
+*/
+int amdgpu_cs_destroy_syncobj(amdgpu_device_handle dev,
+			      uint32_t syncobj);
+
+/**
+ *  Export kernel sync object to shareable fd.
+ *
+ * \param   dev	       - \c [in] device handle
+ * \param   syncobj    - \c [in] sync object handle
+ * \param   shared_fd  - \c [out] shared file descriptor.
+ *
+ * \return   0 on success\n
+ *          <0 - Negative POSIX Error code
+ *
+*/
+int amdgpu_cs_export_syncobj(amdgpu_device_handle dev,
+			     uint32_t syncobj,
+			     int *shared_fd);
+/**
+ *  Import kernel sync object from shareable fd.
+ *
+ * \param   dev	       - \c [in] device handle
+ * \param   shared_fd  - \c [in] shared file descriptor.
+ * \param   syncobj    - \c [out] sync object handle
+ *
+ * \return   0 on success\n
+ *          <0 - Negative POSIX Error code
+ *
+*/
+int amdgpu_cs_import_syncobj(amdgpu_device_handle dev,
+			     int shared_fd,
+			     uint32_t *syncobj);
+
+/**
+ *  Submit raw command submission to kernel
+ *
+ * \param   dev	       - \c [in] device handle
+ * \param   context    - \c [in] context handle for context id
+ * \param   bo_list_handle - \c [in] request bo list handle (0 for none)
+ * \param   num_chunks - \c [in] number of CS chunks to submit
+ * \param   chunks     - \c [in] array of CS chunks
+ * \param   seq_no     - \c [out] output sequence number for submission.
+ *
+ * \return   0 on success\n
+ *          <0 - Negative POSIX Error code
+ *
+ */
+struct drm_amdgpu_cs_chunk;
+struct drm_amdgpu_cs_chunk_dep;
+struct drm_amdgpu_cs_chunk_data;
+
+int amdgpu_cs_submit_raw(amdgpu_device_handle dev,
+			 amdgpu_context_handle context,
+			 amdgpu_bo_list_handle bo_list_handle,
+			 int num_chunks,
+			 struct drm_amdgpu_cs_chunk *chunks,
+			 uint64_t *seq_no);
+
+void amdgpu_cs_chunk_fence_to_dep(struct amdgpu_cs_fence *fence,
+				  struct drm_amdgpu_cs_chunk_dep *dep);
+void amdgpu_cs_chunk_fence_info_to_data(struct amdgpu_cs_fence_info *fence_info,
+					struct drm_amdgpu_cs_chunk_data *data);
+
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* #ifdef _AMDGPU_H_ */
