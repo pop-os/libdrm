@@ -51,8 +51,8 @@ struct gralloc_handle_t {
 	int prime_fd;
 
 	/* api variables */
-	const uint32_t magic; /* differentiate between allocator impls */
-	const uint32_t version; /* api version */
+	uint32_t magic; /* differentiate between allocator impls */
+	uint32_t version; /* api version */
 
 	uint32_t width; /* width of buffer in pixels */
 	uint32_t height; /* height of buffer in pixels */
@@ -73,34 +73,37 @@ struct gralloc_handle_t {
 #define GRALLOC_HANDLE_MAGIC 0x60585350
 #define GRALLOC_HANDLE_NUM_FDS 1
 #define GRALLOC_HANDLE_NUM_INTS (	\
-	((sizeof(struct alloc_handle_t) - sizeof(native_handle_t))/sizeof(int))	\
+	((sizeof(struct gralloc_handle_t) - sizeof(native_handle_t))/sizeof(int))	\
 	 - GRALLOC_HANDLE_NUM_FDS)
+
+static inline struct gralloc_handle_t *gralloc_handle(buffer_handle_t handle)
+{
+	return (struct gralloc_handle_t *)handle;
+}
 
 /**
  * Create a buffer handle.
  */
-static struct gralloc_handle_t gralloc_handle_create(int32_t width,
+static inline native_handle_t *gralloc_handle_create(int32_t width,
                                                      int32_t height,
-                                                     int32_t format,
+                                                     int32_t hal_format,
                                                      int32_t usage)
 {
-	struct alloc_handle_t handle = {
-		.magic = GRALLOC_HANDLE_MAGIC,
-		.version = GRALLOC_HANDLE_VERSION };
-
+	struct gralloc_handle_t *handle;
 	native_handle_t *nhandle = native_handle_create(GRALLOC_HANDLE_NUM_FDS,
-		                                            GRALLOC_HANDLE_NUM_INTS);
-	handle.base = *nhandle;
-	native_handle_delete(nhandle);
+							GRALLOC_HANDLE_NUM_INTS);
 
-	handle.width = width;
-	handle.height = height;
-	handle.format = format;
-	handle.usage = usage;
-	handle.prime_fd = -1;
+	if (!nhandle)
+		return NULL;
 
-	handle->data_owner = getpid();
-	handle->data = bo;
+	handle = gralloc_handle(nhandle);
+	handle->magic = GRALLOC_HANDLE_MAGIC;
+	handle->version = GRALLOC_HANDLE_VERSION;
+	handle->width = width;
+	handle->height = height;
+	handle->format = hal_format;
+	handle->usage = usage;
+	handle->prime_fd = -1;
 
 	return handle;
 }
