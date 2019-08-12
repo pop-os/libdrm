@@ -2,6 +2,7 @@ libdrm (2.4.99-1) UNRELEASED; urgency=medium
 
   * New upstream release. (Closes: #934494)
   * 02_kfreebsd.diff: Dropped, upstream.
+  * symbols: Updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 08 Aug 2019 13:48:57 +0300
 
