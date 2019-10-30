@@ -2,6 +2,7 @@ libdrm (2.4.100-1) UNRELEASED; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release. (Closes: #943777)
+  * symbols: Updated.
 
   [ Rohan Garg ]
   * Add a libdrm-tests package. (Closes: #868898)
