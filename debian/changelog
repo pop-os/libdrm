@@ -1,4 +1,4 @@
-libdrm (2.4.100-1) UNRELEASED; urgency=medium
+libdrm (2.4.100-1) experimental; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release. (Closes: #943777)
@@ -7,7 +7,7 @@ libdrm (2.4.100-1) UNRELEASED; urgency=medium
   [ Rohan Garg ]
   * Add a libdrm-tests package. (Closes: #868898)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 30 Oct 2019 13:22:26 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 31 Oct 2019 23:27:08 +0200
 
 libdrm (2.4.99-1) unstable; urgency=medium
 
