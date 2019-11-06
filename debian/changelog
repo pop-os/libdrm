@@ -1,9 +1,9 @@
-libdrm (2.4.100-2) UNRELEASED; urgency=medium
+libdrm (2.4.100-2) unstable; urgency=medium
 
   * control, rules: Disable libdrm-tests, 2.4.100 is needed for mesa 19.3
     now and not after waiting for the NEW queue to clear.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 06 Nov 2019 20:03:14 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 06 Nov 2019 20:04:53 +0200
 
 libdrm (2.4.100-1) experimental; urgency=medium
 
