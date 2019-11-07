@@ -13,6 +13,7 @@ confflags = \
 	-Dradeon=true \
 	-Damdgpu=true \
 	-Dlibkms=false \
+	-Dinstall-test-programs=true \
 	$()
 
 # Linux vs. the rest:
