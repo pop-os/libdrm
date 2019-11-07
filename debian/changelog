@@ -1,9 +1,9 @@
-libdrm (2.4.100-3) UNRELEASED; urgency=medium
+libdrm (2.4.100-3) unstable; urgency=medium
 
   * Revert dropping libdrm-tests, since the package ended up in NEW
     anyway.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 07 Nov 2019 09:18:50 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 07 Nov 2019 09:19:11 +0200
 
 libdrm (2.4.100-2) unstable; urgency=medium
 
