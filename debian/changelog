@@ -1,9 +1,9 @@
-libdrm (2.4.100-4) UNRELEASED; urgency=medium
+libdrm (2.4.100-4) unstable; urgency=medium
 
   * rules: Override dh_missing.
   * rules: Include additional test binaries on arm. (Closes: #944752)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Fri, 15 Nov 2019 07:48:57 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 21 Nov 2019 14:47:00 +0200
 
 libdrm (2.4.100-3) unstable; urgency=medium
 
