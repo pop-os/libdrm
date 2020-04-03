@@ -3,6 +3,7 @@ libdrm (2.4.101-1) UNRELEASED; urgency=medium
   * New upstream release.
   * source, watch: Upstream provides only xz tarballs, bump source to
     3.0 (quilt).
+  * Add my key to signing-key.asc.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 03 Apr 2020 17:39:32 +0300
 
