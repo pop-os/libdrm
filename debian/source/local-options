@@ -11,3 +11,6 @@ extend-diff-ignore = android/gralloc_handle.h
 
 # misc. files and scripts used by libdrm developers but not required for the build
 extend-diff-ignore = \.editorconfig|\.gitlab-ci.yml|CONTRIBUTING|RELEASING|autogen\.sh|freedreno/kgsl/README
+
+# CI
+extend-diff-ignore = .gitlab-ci/debian-install.sh
