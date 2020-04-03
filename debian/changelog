@@ -7,6 +7,7 @@ libdrm (2.4.101-1) UNRELEASED; urgency=medium
   * control: Use debhelper-compat, bump to 12.
   * control: Bump policy to 4.5.0.
   * local-options: Update extend-diff-ignore.
+  * symbols: Updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 03 Apr 2020 17:39:32 +0300
 
