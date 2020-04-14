@@ -1,9 +1,9 @@
-libdrm (2.4.101-2) UNRELEASED; urgency=medium
+libdrm (2.4.101-2) unstable; urgency=medium
 
   * fix-realpath-vs-firefox.diff: Fix webgl on intel with firefox.
     (Closes: #956665) (LP: #1872586)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 14 Apr 2020 10:36:41 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 14 Apr 2020 16:32:57 +0300
 
 libdrm (2.4.101-1) unstable; urgency=medium
 
