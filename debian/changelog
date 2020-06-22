@@ -2,6 +2,7 @@ libdrm (2.4.102-1) UNRELEASED; urgency=medium
 
   * New upstream release.
   * fix-realpath-vs-firefox.diff: Dropped, upstream.
+  * libdrm-tests.install: Added /usr/bin/drmdevice.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 22 Jun 2020 15:13:10 +0300
 
