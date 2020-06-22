@@ -1,3 +1,9 @@
+libdrm (2.4.102-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 22 Jun 2020 15:13:10 +0300
+
 libdrm (2.4.101-2) unstable; urgency=medium
 
   * fix-realpath-vs-firefox.diff: Fix webgl on intel with firefox.
