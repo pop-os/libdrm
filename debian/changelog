@@ -1,3 +1,9 @@
+libdrm (2.4.103-1) UNRELEASED; urgency=medium
+
+  * New upstream release. (Closes: #970304)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 10 Nov 2020 18:51:43 +0200
+
 libdrm (2.4.102-1) unstable; urgency=medium
 
   * New upstream release.
