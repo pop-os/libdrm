@@ -1,6 +1,7 @@
 libdrm (2.4.104-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * Add signing-key from Simon Ser.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 28 Jan 2021 10:39:41 +0200
 
