@@ -1,11 +1,11 @@
-libdrm (2.4.104-1) UNRELEASED; urgency=medium
+libdrm (2.4.104-1) unstable; urgency=medium
 
   * New upstream release.
   * Add signing-key from Simon Ser.
   * control: Manpages now need python3-docutils instead of docbook-xsl
     to build, make it so.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Thu, 28 Jan 2021 10:39:41 +0200
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 28 Jan 2021 12:18:32 +0200
 
 libdrm (2.4.103-2) unstable; urgency=medium
 
