@@ -1,6 +1,7 @@
 libdrm (2.4.105-1) UNRELEASED; urgency=medium
 
   * New upstream release. (LP: #1923880)
+  * symbols: Updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Wed, 14 Apr 2021 20:41:44 +0300
 
