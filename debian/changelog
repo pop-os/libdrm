@@ -1,3 +1,9 @@
+libdrm (2.4.107-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 02 Jul 2021 16:03:07 +0300
+
 libdrm (2.4.105-3) experimental; urgency=medium
 
   * Revert a commit causing additional dependencies to be added to *.pc.in.
