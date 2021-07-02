@@ -1,3 +1,2 @@
 01_default_perms.diff
-revert-set-fb-modifiers-flag.diff
 Revert-meson-use-library-instead-of-shared_library.patch
