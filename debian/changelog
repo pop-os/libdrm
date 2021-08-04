@@ -3,6 +3,7 @@ libdrm (2.4.107-1) UNRELEASED; urgency=medium
   * New upstream release.
   * revert-set-fb-modifiers-flag.diff: Dropped, upstream.
   * control: Add python3-setuptools to build-depends.
+  * symbols: Updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Fri, 02 Jul 2021 16:03:07 +0300
 
