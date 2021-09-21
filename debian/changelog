@@ -1,8 +1,8 @@
-libdrm (2.4.107-3) UNRELEASED; urgency=medium
+libdrm (2.4.107-3) unstable; urgency=medium
 
   * Include static libs in -dev again. (LP: #1944107)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 21 Sep 2021 16:47:22 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 21 Sep 2021 16:52:54 +0300
 
 libdrm (2.4.107-2) unstable; urgency=medium
 
