@@ -1,3 +1,10 @@
+libdrm (2.4.107-4) UNRELEASED; urgency=medium
+
+  * control: Add libpciaccess-dev to -dev Depends, required by
+    libdrm_intel.pc.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 22 Sep 2021 11:51:20 +0300
+
 libdrm (2.4.107-3) unstable; urgency=medium
 
   * Include static libs in -dev again. (LP: #1944107)
