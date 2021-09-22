@@ -1,3 +1,9 @@
+libdrm (2.4.107-5) UNRELEASED; urgency=medium
+
+  * control: Add valgrind to libdrm-dev Depends. (Closes: #994873)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 22 Sep 2021 13:56:05 +0300
+
 libdrm (2.4.107-4) unstable; urgency=medium
 
   * control: Add libpciaccess-dev to -dev Depends, required by
