@@ -1,8 +1,8 @@
-libdrm (2.4.107-5) UNRELEASED; urgency=medium
+libdrm (2.4.107-5) unstable; urgency=medium
 
   * control: Add valgrind to libdrm-dev Depends. (Closes: #994873)
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 22 Sep 2021 13:56:05 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 23 Sep 2021 05:26:53 +0300
 
 libdrm (2.4.107-4) unstable; urgency=medium
 
