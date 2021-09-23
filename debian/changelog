@@ -1,3 +1,9 @@
+libdrm (2.4.107-6) UNRELEASED; urgency=medium
+
+  * control: Fix valgrind dependency archs for libdrm-dev.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 23 Sep 2021 14:08:41 +0300
+
 libdrm (2.4.107-5) unstable; urgency=medium
 
   * control: Add valgrind to libdrm-dev Depends. (Closes: #994873)

@@ -36,7 +36,7 @@ Depends:
  libdrm-tegra0 (= ${binary:Version}) [any-arm arm64],
  libdrm-etnaviv1 (= ${binary:Version}) [armhf arm64],
  libpciaccess-dev,
- valgrind,
+ valgrind [amd64 armhf i386 mips mipsel powerpc s390x],
  ${misc:Depends},
 Multi-Arch: same
 Description: Userspace interface to kernel DRM services -- development files
