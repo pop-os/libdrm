@@ -1,3 +1,10 @@
+libdrm (2.4.107-7) UNRELEASED; urgency=medium
+
+  * Drop valgrind support, it's not ready for multi-arch. (Closes:
+    #994955)
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 27 Sep 2021 14:36:28 +0300
+
 libdrm (2.4.107-6) unstable; urgency=medium
 
   * control: Fix valgrind dependency archs for libdrm-dev.
