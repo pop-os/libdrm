@@ -15,6 +15,7 @@ confflags = \
 	-Damdgpu=true \
 	-Dlibkms=false \
 	-Dinstall-test-programs=true \
+	-Dvalgrind=false \
 	$()
 
 # Linux vs. the rest:
