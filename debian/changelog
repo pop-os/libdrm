@@ -1,8 +1,8 @@
-libdrm (2.4.107-8) UNRELEASED; urgency=medium
+libdrm (2.4.107-8) unstable; urgency=medium
 
   * rules: Forcibly disable valgrind.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Mon, 27 Sep 2021 20:10:19 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 27 Sep 2021 20:10:39 +0300
 
 libdrm (2.4.107-7) unstable; urgency=medium
 
