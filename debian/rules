@@ -13,7 +13,6 @@ confflags = \
 	-Ddefault_library=both \
 	-Dradeon=true \
 	-Damdgpu=true \
-	-Dlibkms=false \
 	-Dinstall-test-programs=true \
 	-Dvalgrind=false \
 	$()
