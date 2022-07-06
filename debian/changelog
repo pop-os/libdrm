@@ -1,10 +1,10 @@
-libdrm (2.4.111-1) UNRELEASED; urgency=medium
+libdrm (2.4.111-1) unstable; urgency=medium
 
   * New upstream release.
   * install, rules: libkms got removed.
   * symbols: Updated.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 05 Jul 2022 09:57:31 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 06 Jul 2022 08:26:24 +0300
 
 libdrm (2.4.110-1) unstable; urgency=medium
 
