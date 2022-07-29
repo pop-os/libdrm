@@ -102,6 +102,9 @@ override_dh_install:
 	for file in debian/tmp/usr/bin/exynos_*; do \
 		mv $$file debian/libdrm-tests/usr/bin; \
 	done
+	for file in debian/tmp/usr/bin/tegra_*; do \
+		mv $$file debian/libdrm-tests/usr/bin; \
+	done
   endif
   ifneq (,$(filter $(DEB_HOST_ARCH),armhf arm64))
 	for file in debian/tmp/usr/bin/etnaviv*; do \
