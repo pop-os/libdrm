@@ -102,7 +102,9 @@ override_dh_install:
 	for file in debian/tmp/usr/bin/exynos_*; do \
 		mv $$file debian/libdrm-tests/usr/bin; \
 	done
-	for file in debian/tmp/usr/bin/tegra_*; do \
+  endif
+  ifneq (,$(filter $(DEB_HOST_ARCH_CPU),arm arm64))
+	for file in debian/tmp/usr/bin/tegra-*; do \
 		mv $$file debian/libdrm-tests/usr/bin; \
 	done
   endif
