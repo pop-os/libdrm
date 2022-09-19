@@ -2,6 +2,7 @@ libdrm (2.4.113-1) UNRELEASED; urgency=medium
 
   * New upstream release.
   * rules: Rework confflags to match current upstream.
+  * symbols: Updated.
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 19 Sep 2022 10:27:49 +0300
 
