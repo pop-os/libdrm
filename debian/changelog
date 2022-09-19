@@ -1,3 +1,9 @@
+libdrm (2.4.113-2) UNRELEASED; urgency=medium
+
+  * rules: Fix arm FTBFS.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 19 Sep 2022 18:38:34 +0300
+
 libdrm (2.4.113-1) unstable; urgency=medium
 
   * New upstream release.

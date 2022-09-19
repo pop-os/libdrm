@@ -81,7 +81,7 @@ ifneq (,$(filter arm arm64,$(DEB_HOST_ARCH_CPU)))
 	FREEDRENO = yes
 endif
 ifeq ($(FREEDRENO), yes)
-	confflags += -Dfreedreno=enabled -Dfreedreno-kgsl=enabled
+	confflags += -Dfreedreno=enabled -Dfreedreno-kgsl=true
 else
 	confflags += -Dfreedreno=disabled
 endif
