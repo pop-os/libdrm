@@ -1,4 +1,5 @@
 libdrm_etnaviv.so.1 libdrm-etnaviv1 #MINVER#
+* Build-Depends-Package: libdrm-dev
  etna_bo_cpu_fini@Base 0
  etna_bo_cpu_prep@Base 0
  etna_bo_del@Base 0

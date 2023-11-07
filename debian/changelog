@@ -6,6 +6,7 @@ libdrm (2.4.117-2) UNRELEASED; urgency=medium
   * control, rules: Drop quilt B-D and param
   * control: Update Homepage to point to gitlab.f.o
   * patches: Add DEP-3 header to 01_default_perms.diff
+  * symbols: Add missing Build-Depends-Package fields
 
  -- Diederik de Haas <didi.debian@cknow.org>  Tue, 07 Nov 2023 10:17:27 +0100
 

@@ -1,4 +1,5 @@
 libdrm_freedreno.so.1 libdrm-freedreno1 #MINVER#
+* Build-Depends-Package: libdrm-dev
  fd_bo_cpu_fini@Base 0
  fd_bo_cpu_prep@Base 0
  fd_bo_del@Base 0

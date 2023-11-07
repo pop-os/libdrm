@@ -1,4 +1,5 @@
 libdrm_tegra.so.0 libdrm-tegra0 #MINVER#
+* Build-Depends-Package: libdrm-dev
  drm_tegra_bo_export@Base 2.4.112
  drm_tegra_bo_get_handle@Base 0
  drm_tegra_bo_get_name@Base 2.4.112

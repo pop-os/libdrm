@@ -1,4 +1,5 @@
 libdrm_amdgpu.so.1 libdrm-amdgpu1 #MINVER#
+* Build-Depends-Package: libdrm-dev
  amdgpu_bo_alloc@Base 2.4.63
  amdgpu_bo_cpu_map@Base 2.4.63
  amdgpu_bo_cpu_unmap@Base 2.4.63
