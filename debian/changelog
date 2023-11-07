@@ -1,6 +1,7 @@
 libdrm (2.4.117-2) UNRELEASED; urgency=medium
 
   * control: Remove unused Build-Depends
+  * control: Update Standards-Version to 4.6.2 (no changes needed)
 
  -- Diederik de Haas <didi.debian@cknow.org>  Tue, 07 Nov 2023 10:17:27 +0100
 
@@ -1407,4 +1408,3 @@ libdrm (1.0.2-1) unstable; urgency=low
   * Initial release. Closes: #324074
 
  -- Marcelo E. Magallon <mmagallo@debian.org>  Fri, 19 Aug 2005 21:11:18 -0600
-
