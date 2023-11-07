@@ -141,6 +141,5 @@ ifeq ($(FREEDRENO), yes)
 endif
 
 %:
-	dh $@ --with quilt \
-		--builddirectory=build/ \
+	dh $@ --builddirectory=build/ \
 		--buildsystem=meson
