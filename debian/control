@@ -17,7 +17,7 @@ Rules-Requires-Root: no
 Section: libs
 Vcs-Git: https://salsa.debian.org/xorg-team/lib/libdrm
 Vcs-Browser: https://salsa.debian.org/xorg-team/lib/libdrm
-Homepage: https://cgit.freedesktop.org/mesa/drm/
+Homepage: https://gitlab.freedesktop.org/mesa/drm/
 
 Package: libdrm-dev
 Section: libdevel
