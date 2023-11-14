@@ -5,12 +5,13 @@ Uploaders: Andreas Boll <aboll@debian.org>
 Build-Depends:
  debhelper-compat (= 13),
  meson,
+ libatomic-ops-dev,
+ libpciaccess-dev,
+ libudev-dev [linux-any],
  libx11-dev,
  pkg-config,
- python3-setuptools,
- libudev-dev [linux-any],
- libpciaccess-dev,
  python3-docutils,
+ python3-setuptools,
 # valgrind [amd64 armhf i386 mips mipsel powerpc s390x],
 Standards-Version: 4.6.2
 Rules-Requires-Root: no

@@ -1,5 +1,6 @@
 libdrm (2.4.117-2) UNRELEASED; urgency=medium
 
+  [ Diederik de Haas ]
   * control: Remove unused Build-Depends
   * control: Update Standards-Version to 4.6.2 (no changes needed)
   * control: Specify Rules-Requires-Root: no
@@ -8,6 +9,9 @@ libdrm (2.4.117-2) UNRELEASED; urgency=medium
   * patches: Add DEP-3 header to 01_default_perms.diff
   * symbols: Add missing Build-Depends-Package fields
   * symbols, lintian: Drop reference to private symbols
+
+  [ Timo Aaltonen ]
+  * control: Enable atomic-ops.
 
  -- Diederik de Haas <didi.debian@cknow.org>  Tue, 07 Nov 2023 10:17:27 +0100
 
