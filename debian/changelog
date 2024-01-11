@@ -14,6 +14,7 @@ libdrm (2.4.119-1) UNRELEASED; urgency=medium
   * New upstream release. (Closes: #1059854)
   * control: Enable atomic-ops.
   * debian/gitlab-ci.yml: Added.
+  * symbols: Updated.
 
  -- Diederik de Haas <didi.debian@cknow.org>  Tue, 07 Nov 2023 10:17:27 +0100
 

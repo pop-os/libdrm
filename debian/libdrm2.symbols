@@ -75,6 +75,7 @@ libdrm.so.2 libdrm2 #MINVER#
  drmGetLock@Base 2.3.1
  drmGetMagic@Base 2.3.1
  drmGetMap@Base 2.3.1
+ drmGetNodeTypeFromDevId@Base 2.4.119
  drmGetNodeTypeFromFd@Base 2.4.60
  drmGetPrimaryDeviceNameFromFd@Base 2.4.60
  drmGetRenderDeviceNameFromFd@Base 2.4.60
@@ -108,6 +109,7 @@ libdrm.so.2 libdrm2 #MINVER#
  drmModeAtomicMerge@Base 2.4.62
  drmModeAtomicSetCursor@Base 2.4.62
  drmModeAttachMode@Base 2.4.3
+ drmModeCloseFB@Base 2.4.119
  drmModeConnectorGetPossibleCrtcs@Base 2.4.112
  drmModeConnectorSetProperty@Base 2.4.3
  drmModeCreateDumbBuffer@Base 2.4.114
