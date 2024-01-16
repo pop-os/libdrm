@@ -1,9 +1,10 @@
-libdrm (2.4.119-2) UNRELEASED; urgency=medium
+libdrm (2.4.119-2) unstable; urgency=medium
 
+  [ Diederik de Haas ]
   * Add new signing-key from Marek Olšák
   * symbols: Add new symbol for amdgpu
 
- -- Diederik de Haas <didi.debian@cknow.org>  Fri, 12 Jan 2024 19:43:14 +0100
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 16 Jan 2024 14:05:50 +0200
 
 libdrm (2.4.119-1) unstable; urgency=medium
 
