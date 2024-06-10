@@ -1,3 +1,9 @@
+libdrm (2.4.121-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Mon, 10 Jun 2024 19:13:38 +0300
+
 libdrm (2.4.120-2) unstable; urgency=medium
 
   * control: Drop libatomic-ops-dev from build-depends again, as we can
