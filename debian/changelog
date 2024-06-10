@@ -1,6 +1,7 @@
 libdrm (2.4.121-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * control: Add arm64 to libdrm-intel1 archs. (Closes: #1070815)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Mon, 10 Jun 2024 19:13:38 +0300
 
