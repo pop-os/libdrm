@@ -1,10 +1,10 @@
-libdrm (2.4.123-1) UNRELEASED; urgency=medium
+libdrm (2.4.123-1) unstable; urgency=medium
 
   * New upstream release.
   * Add upstream metadata, drop old git url from d/watch.
   * Update signing-key.asc.
 
- -- Timo Aaltonen <tjaalton@debian.org>  Tue, 10 Sep 2024 10:55:26 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Tue, 10 Sep 2024 11:03:50 +0300
 
 libdrm (2.4.122-1) unstable; urgency=medium
 
