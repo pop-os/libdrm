@@ -1,3 +1,9 @@
+libdrm (2.4.124-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Thu, 16 Jan 2025 17:07:46 +0200
+
 libdrm (2.4.123-1) unstable; urgency=medium
 
   * New upstream release.
