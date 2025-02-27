@@ -1,6 +1,8 @@
 libdrm (2.4.124-1) UNRELEASED; urgency=medium
 
   * New upstream release.
+  * amdgpu-add-env-support-for-amdgpu-ids.patch: Add a patch to allow
+    using an env variable for amdgpu.ids path. (LP: #2100483)
 
  -- Timo Aaltonen <tjaalton@debian.org>  Thu, 16 Jan 2025 17:07:46 +0200
 
