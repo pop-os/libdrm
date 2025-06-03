@@ -1,3 +1,10 @@
+libdrm (2.4.124-3) UNRELEASED; urgency=medium
+
+  [Jianfeng Liu]
+  * Enable build libdrm-intel1 for loong64. (Closes: #1107223)
+
+ -- Jianfeng Liu <liujianfeng1994@gmail.com>  Tue, 03 Jun 2025 17:50:57 +0800
+
 libdrm (2.4.124-2) unstable; urgency=medium
 
   [ Daniel van Vugt ]
