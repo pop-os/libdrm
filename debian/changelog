@@ -5,6 +5,7 @@ libdrm (2.4.125-1) UNRELEASED; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release.
+  * patches: Drop the upstreamed fix for xf86drm.
 
  -- Jianfeng Liu <liujianfeng1994@gmail.com>  Tue, 03 Jun 2025 17:50:57 +0800
 
