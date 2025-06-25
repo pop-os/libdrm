@@ -978,6 +978,11 @@ static int drmOpenMinor(int minor, int create, int type)
  *
  * \return 1 if the DRM driver is loaded, 0 otherwise.
  *
+ * \deprecated
+ * This function doesn't work when a device goes away (as is often the case
+ * with simpledrm). drmGetDevices2 should be used instead to enumerate DRM
+ * devices.
+ *
  * \internal
  * Determine the presence of the kernel driver by attempting to open the 0
  * minor and get version information.  For backward compatibility with older
@@ -1343,11 +1348,11 @@ static void drmCopyVersion(drmVersionPtr d, const drm_version_t *s)
     d->version_minor      = s->version_minor;
     d->version_patchlevel = s->version_patchlevel;
     d->name_len           = s->name_len;
-    d->name               = strdup(s->name);
+    d->name               = s->name ? strdup(s->name) : NULL;
     d->date_len           = s->date_len;
-    d->date               = strdup(s->date);
+    d->date               = s->date ? strdup(s->date) : NULL;
     d->desc_len           = s->desc_len;
-    d->desc               = strdup(s->desc);
+    d->desc               = s->desc ? strdup(s->desc) : NULL;
 }
 
 
