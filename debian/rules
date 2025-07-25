@@ -143,3 +143,6 @@ endif
 %:
 	dh $@ --builddirectory=build/ \
 		--buildsystem=meson
+
+override_dh_builddeb:
+	dh_builddeb -- -Zzstd -z3
