@@ -1,3 +1,9 @@
+libdrm (2.4.125-1pop0) noble; urgency=medium
+
+  * Backport to Pop!_OS
+
+ -- Jeremy Soller <jeremy@system76.com>  Fri, 25 Jul 2025 09:53:55 -0600
+
 libdrm (2.4.125-1) experimental; urgency=medium
 
   [ Jianfeng Liu ]
