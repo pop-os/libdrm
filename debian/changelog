@@ -1,3 +1,10 @@
+libdrm (2.4.125-3) UNRELEASED; urgency=medium
+
+  * Team upload.
+  * debian/copyright: Convert to machine-readable format (Closes: #1107707)
+
+ -- Dylan Aïssi <daissi@debian.org>  Sun, 27 Jul 2025 18:09:46 +0200
+
 libdrm (2.4.125-2) unstable; urgency=medium
 
   * Upload to sid.
