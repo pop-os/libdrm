@@ -1,3 +1,9 @@
+libdrm (2.4.125-2) unstable; urgency=medium
+
+  * Upload to sid.
+
+ -- Timo Aaltonen <tjaalton@debian.org>  Fri, 22 Aug 2025 14:04:45 +0300
+
 libdrm (2.4.125-1) experimental; urgency=medium
 
   [ Jianfeng Liu ]
