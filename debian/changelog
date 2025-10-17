@@ -6,6 +6,7 @@ libdrm (2.4.127-1) UNRELEASED; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release.
+  * watch: Update to version 5.
 
  -- Dylan Aïssi <daissi@debian.org>  Sun, 27 Jul 2025 18:09:46 +0200
 
