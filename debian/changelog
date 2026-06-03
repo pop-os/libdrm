@@ -2,6 +2,7 @@ libdrm (2.4.134-1) UNRELEASED; urgency=medium
 
   [ Timo Aaltonen ]
   * New upstream release.
+  * symbols: Updated.
 
   [ Diederik de Haas ]
   * control: Update upstream Homepage URL
