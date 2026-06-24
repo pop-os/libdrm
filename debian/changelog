@@ -1,8 +1,8 @@
-libdrm (2.4.134-2) UNRELEASED; urgency=medium
+libdrm (2.4.134-2) unstable; urgency=medium
 
   * Enable freedreno on amd64
 
- -- Timo Aaltonen <tjaalton@debian.org>  Wed, 24 Jun 2026 12:06:25 +0300
+ -- Timo Aaltonen <tjaalton@debian.org>  Wed, 24 Jun 2026 12:10:20 +0300
 
 libdrm (2.4.134-1) unstable; urgency=medium
 
