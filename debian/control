@@ -29,7 +29,7 @@ Depends:
  libdrm-nouveau2 (= ${binary:Version}) [linux-any],
  libdrm-amdgpu1 (= ${binary:Version}),
  libdrm-omap1 (= ${binary:Version}) [any-arm],
- libdrm-freedreno1 (= ${binary:Version}) [any-arm arm64],
+ libdrm-freedreno1 (= ${binary:Version}) [amd64 any-arm arm64],
  libdrm-exynos1 (= ${binary:Version}) [any-arm],
  libdrm-tegra0 (= ${binary:Version}) [any-arm arm64],
  libdrm-etnaviv1 (= ${binary:Version}) [armhf arm64],
@@ -159,7 +159,7 @@ Description: Userspace interface to omap-specific kernel DRM services -- runtime
  OpenGL drivers.
 
 Package: libdrm-freedreno1
-Architecture: any-arm arm64
+Architecture: amd64 any-arm arm64
 Depends:
  ${shlibs:Depends},
  ${misc:Depends},
