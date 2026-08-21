@@ -1,3 +1,9 @@
+libdrm (2.4.134-3pop0) noble; urgency=medium
+
+  * Pop!_OS backport
+
+ -- Jeremy Soller <jeremy@system76.com>  Fri, 21 Aug 2026 09:30:42 -0600
+
 libdrm (2.4.134-3) unstable; urgency=medium
 
   * Enable freedreno on i386 too
